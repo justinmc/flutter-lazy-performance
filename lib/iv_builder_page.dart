@@ -12,6 +12,10 @@ class IVBuilderPage extends StatefulWidget {
 class _IVBuilderPageState extends State<IVBuilderPage> {
   final TransformationController _transformationController = TransformationController();
 
+  static const double _minScale = 0.5;
+  static const double _maxScale = 2.5;
+  static const double _scaleRange = _maxScale - _minScale;
+
   void _onChangeTransformation() {
     setState(() {});
   }
@@ -46,14 +50,13 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
             boundaryMargin: EdgeInsets.all(double.infinity),
             constrained: false,
             transformationController: _transformationController,
-            maxScale: 2.5,
-            minScale: 0.5,
+            maxScale: _maxScale,
+            minScale: _minScale,
             child: Builder(
               builder: (BuildContext context) {
-                final Color color = _transformationController.value.getMaxScaleOnAxis() > 1.0
-                    ? Colors.red
-                    : Colors.blue;
-                return Container(width: 400, height: 400, color: color);
+                final double scale = _transformationController.value.getMaxScaleOnAxis();
+                final Color color = Colors.red.withOpacity((scale - _minScale) / _scaleRange);
+                return Container(width: 200, height: 200, color: color);
               },
             ),
           ),
