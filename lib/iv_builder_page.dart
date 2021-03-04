@@ -12,6 +12,22 @@ class IVBuilderPage extends StatefulWidget {
 class _IVBuilderPageState extends State<IVBuilderPage> {
   final TransformationController _transformationController = TransformationController();
 
+  void _onChangeTransformation() {
+    setState(() {});
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _transformationController.addListener(_onChangeTransformation);
+  }
+
+  @override
+  void dispose() {
+    _transformationController.removeListener(_onChangeTransformation);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,11 +42,20 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
           height: 200.0,
           child: InteractiveViewer(
             alignPanAxis: false,
+            clipBehavior: Clip.none,
             boundaryMargin: EdgeInsets.all(double.infinity),
             constrained: false,
             transformationController: _transformationController,
-            scaleEnabled: false,
-            child: Container(width: 400, height: 400, color: Colors.red),
+            maxScale: 2.5,
+            minScale: 0.5,
+            child: Builder(
+              builder: (BuildContext context) {
+                final Color color = _transformationController.value.getMaxScaleOnAxis() > 1.0
+                    ? Colors.red
+                    : Colors.blue;
+                return Container(width: 400, height: 400, color: color);
+              },
+            ),
           ),
         ),
       ),

@@ -12,6 +12,8 @@ class ListViewBuilderPage extends StatefulWidget {
 }
 
 class _ListViewBuilderPageState extends State<ListViewBuilderPage> {
+  static const _itemCount = 40;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,10 +27,11 @@ class _ListViewBuilderPageState extends State<ListViewBuilderPage> {
           width: 400.0,
           height: 400.0,
           child: ListView.builder(
+            itemCount: _itemCount,
             itemBuilder: (BuildContext context, int index) {
-              print('justin builder $index');
               return Container(
                 height: 100,
+                color: Colors.teal.withOpacity(index / _itemCount),
                 child: _UFO(
                   index: index,
                 ),
