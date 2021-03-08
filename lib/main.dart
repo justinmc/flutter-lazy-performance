@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'iv_builder_page.dart';
 import 'list_view_builder_page.dart';
+import 'procedural_generation_page.dart';
 
 final List<Type> pages = <Type>[
   IVBuilderPage,
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
         '/': (BuildContext context) => MyHomePage(),
         IVBuilderPage.routeName: (BuildContext context) => IVBuilderPage(),
         ListViewBuilderPage.routeName: (BuildContext context) => ListViewBuilderPage(),
+        ProceduralGenerationPage.routeName: (BuildContext context) => ProceduralGenerationPage(),
       },
     );
   }
@@ -50,6 +52,11 @@ class MyHomePage extends StatelessWidget {
             route: '/iv-builder',
             title: 'InteractiveViewer Builder Example',
             subtitle: 'Build only the visible parts.',
+          ),
+          MyListItem(
+            route: '/procedural-generation',
+            title: 'InteractiveViewer Procedural Generation Example',
+            subtitle: 'Generate the content to build.',
           ),
         ],
       ),
