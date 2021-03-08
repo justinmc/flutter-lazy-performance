@@ -21,9 +21,8 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
   static const double _minScale = 0.5;
   static const double _maxScale = 2.5;
   static const double _scaleRange = _maxScale - _minScale;
-  static const double _cellWidth = 200.0;
-  static const double _cellHeight = 26.0;
 
+  /*
   // Returns true iff the given cell is currently visible. Caches viewport
   // calculations.
   Rect _cachedViewport;
@@ -42,6 +41,7 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
     return row >= _firstVisibleRow && row <= _lastVisibleRow
         && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
   }
+  */
 
   void _onChangeTransformation() {
     setState(() {});
@@ -76,7 +76,12 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
               maxScale: _maxScale,
               minScale: _minScale,
               builder: (BuildContext context, Rect viewport) {
-                return _MapGrid();
+                return _MapGrid(
+                  columns: (viewport.width / cellSize.width).ceil(),
+                  rows: (viewport.height / cellSize.height).ceil(),
+                  firstColumn: (viewport.left / cellSize.width).floor(),
+                  firstRow: (viewport.top / cellSize.height).floor(),
+                );
               },
             );
           },
@@ -87,19 +92,35 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
 }
 
 class _MapGrid extends StatelessWidget {
+  _MapGrid({
+    Key key,
+    this.viewport,
+    this.columns,
+    this.rows,
+    this.firstColumn,
+    this.firstRow,
+  }) : super(key: key);
+
   // TODO(justinmc): UI for choosing a seed.
   final MapData _mapData = MapData(seed: 80);
+  final Rect viewport;
+
+  final int columns;
+  final int rows;
+  final int firstColumn;
+  final int firstRow;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        Row(
-          children: <Widget>[
-            _MapTile(tileData: _mapData.getTileDataAt(0, 0)),
-            _MapTile(tileData: _mapData.getTileDataAt(0, 1)),
-          ],
-        ),
+        for (int row = firstRow; row < firstRow + rows; row++)
+          Row(
+            children: <Widget>[
+              for (int column = firstColumn; column < firstColumn + columns; column++)
+                _MapTile(tileData: _mapData.getTileDataAt(row, column)),
+            ],
+          ),
       ],
     );
   }
