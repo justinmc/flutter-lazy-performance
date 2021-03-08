@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
+import 'constants.dart';
+import 'map_data.dart';
+
 class ProceduralGenerationPage extends StatefulWidget {
   const ProceduralGenerationPage({ Key key }) : super(key: key);
 
@@ -84,14 +87,17 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
 }
 
 class _MapGrid extends StatelessWidget {
+  // TODO(justinmc): UI for choosing a seed.
+  final MapData _mapData = MapData(seed: 80);
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
         Row(
           children: <Widget>[
-            _Grassland(),
-            _Grassland(),
+            _MapTile(tileData: _mapData.getTileDataAt(0, 0)),
+            _MapTile(tileData: _mapData.getTileDataAt(0, 1)),
           ],
         ),
       ],
@@ -102,16 +108,23 @@ class _MapGrid extends StatelessWidget {
 class _MapTile extends StatelessWidget {
   _MapTile({
     Key key,
-    @required this.child,
+    @required this.tileData,
   }) : super(key: key);
 
-  final Widget child;
+  final TileData tileData;
 
   @override
   Widget build(BuildContext context) {
+    Widget child;
+    if (tileData.tileType.layer == Layers.terrestrial && tileData.tileType.terrain.terrainType == Terrains.grassland) {
+      child = _Grassland();
+    } else {
+      throw new FlutterError('Invalid tile type');
+    }
+
     return Container(
-      width: 100.0,
-      height: 100.0,
+      width: cellSize.width,
+      height: cellSize.height,
       decoration: BoxDecoration(
         border: Border.all(color: Colors.black)
       ),
@@ -123,21 +136,19 @@ class _MapTile extends StatelessWidget {
 class _Grassland extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return _MapTile(
-      child: Stack(
-        children: <Widget>[
-          Positioned(
-            left: 0.0,
-            top: 0.0,
-            child: _Grass(),
-          ),
-          Positioned(
-            left: 50.0,
-            top: 0.0,
-            child: _Grass(),
-          ),
-        ],
-      ),
+    return Stack(
+      children: <Widget>[
+        Positioned(
+          left: 0.0,
+          top: 0.0,
+          child: _Grass(),
+        ),
+        Positioned(
+          left: 50.0,
+          top: 0.0,
+          child: _Grass(),
+        ),
+      ],
     );
   }
 }
