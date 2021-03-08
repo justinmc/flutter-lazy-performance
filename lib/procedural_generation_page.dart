@@ -117,7 +117,10 @@ class _MapTile extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget child;
     if (tileData.tileType.layer == Layers.terrestrial && tileData.tileType.terrain.terrainType == Terrains.grassland) {
-      child = _Grassland();
+      child = _Grassland(
+        aOffsets: tileData.aOffsets,
+        bOffsets: tileData.bOffsets,
+      );
     } else {
       throw new FlutterError('Invalid tile type');
     }
@@ -134,20 +137,33 @@ class _MapTile extends StatelessWidget {
 }
 
 class _Grassland extends StatelessWidget {
+  const _Grassland({
+    this.aOffsets,
+    this.bOffsets,
+  });
+
+  final List<Offset> aOffsets;
+  final List<Offset> bOffsets;
+
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-        Positioned(
-          left: 0.0,
-          top: 0.0,
-          child: _Grass(),
-        ),
-        Positioned(
-          left: 50.0,
-          top: 0.0,
-          child: _Grass(),
-        ),
+        for (Offset offset in aOffsets)
+          Positioned(
+            left: offset.dx,
+            top: offset.dy,
+            child: _Grass(),
+          ),
+        // TODO(justinmc): Something besides grass
+          /*
+        for (Offset offset in bOffsets)
+          Positioned(
+            left: 50.0,
+            top: 0.0,
+            child: _Grass(),
+          ),
+          */
       ],
     );
   }

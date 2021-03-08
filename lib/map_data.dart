@@ -37,7 +37,7 @@ class TileData {
          ),
     ];
     final List<Offset> bOffsets = <Offset>[
-      for(int i = 0; i < random.nextInt(_maxLocations); i++)
+      for (int i = 0; i < random.nextInt(_maxLocations); i++)
          Offset(
            random.nextDouble() * _maxX,
            random.nextDouble() * _maxY,
