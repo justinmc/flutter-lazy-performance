@@ -49,6 +49,7 @@ flutter:
   assets:
     - assets/UFO.riv
     - assets/grass.riv
+    - assets/marty_v6.riv
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

@@ -59,7 +59,7 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('IV Builder'),
+        title: const Text('Two Dimensions'),
         actions: <Widget>[
         ],
       ),

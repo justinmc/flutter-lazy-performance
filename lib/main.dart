@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import 'iv_builder_page.dart';
 import 'list_view_builder_page.dart';
+import 'list_view_page.dart';
 import 'procedural_generation_page.dart';
 
 final List<Type> pages = <Type>[
@@ -25,6 +26,7 @@ class MyApp extends StatelessWidget {
       routes: <String, Widget Function(BuildContext)>{
         '/': (BuildContext context) => MyHomePage(),
         IVBuilderPage.routeName: (BuildContext context) => IVBuilderPage(),
+        ListViewPage.routeName: (BuildContext context) => ListViewPage(),
         ListViewBuilderPage.routeName: (BuildContext context) => ListViewBuilderPage(),
         ProceduralGenerationPage.routeName: (BuildContext context) => ProceduralGenerationPage(),
       },
@@ -43,6 +45,11 @@ class MyHomePage extends StatelessWidget {
       ),
       body: ListView(
         children: <Widget>[
+          MyListItem(
+            route: '/list-view',
+            title: 'Plain ListView Example',
+            subtitle: 'Build everything upfront.',
+          ),
           MyListItem(
             route: '/list-view-builder',
             title: 'ListView.builder Example',

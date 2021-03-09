@@ -4,22 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-class ListViewBuilderPage extends StatefulWidget {
-  const ListViewBuilderPage({ Key key }) : super(key: key);
+class ListViewPage extends StatefulWidget {
+  const ListViewPage({ Key key }) : super(key: key);
 
-  static const String routeName = '/list-view-builder';
+  static const String routeName = '/list-view';
 
-  @override _ListViewBuilderPageState createState() => _ListViewBuilderPageState();
+  @override _ListViewPageState createState() => _ListViewPageState();
 }
 
-class _ListViewBuilderPageState extends State<ListViewBuilderPage> {
-  static const _itemCount = 100;
+class _ListViewPageState extends State<ListViewPage> {
+  static const _itemCount = 10;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ListView.builder'),
+        title: const Text('SingleChildScrollView'),
         actions: <Widget>[
         ],
       ),
@@ -27,17 +27,19 @@ class _ListViewBuilderPageState extends State<ListViewBuilderPage> {
         child: Container(
           width: 400.0,
           height: 400.0,
-          child: ListView.builder(
-            itemCount: _itemCount,
-            itemBuilder: (BuildContext context, int index) {
-              return Container(
-                height: 200,
-                color: Colors.teal.withOpacity(index / _itemCount),
-                child: _Marty(
-                  index: index,
-                ),
-              );
-            },
+          child: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                for (int i = 0; i < _itemCount; i++)
+                  Container(
+                    height: 200,
+                    color: Colors.teal.withOpacity(i / _itemCount),
+                    child: _Marty(
+                      index: i,
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
