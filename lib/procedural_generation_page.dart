@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
+import 'layer.dart';
 import 'map_data.dart';
 
 class ProceduralGenerationPage extends StatefulWidget {
@@ -76,11 +77,28 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
               maxScale: _maxScale,
               minScale: _minScale,
               builder: (BuildContext context, Rect viewport) {
+                final int columns = (viewport.width / cellSize.width).ceil();
+                final int rows = (viewport.height / cellSize.height).ceil();
+
+                LayerType layer;
+                if (columns > 1000 || rows > 1000) {
+                  layer = LayerType.galactic;
+                } else if (columns > 100 || rows > 100) {
+                  layer = LayerType.solar;
+                } else if (columns > 10 || rows > 10) {
+                  layer = LayerType.terrestrial;
+                } else {
+                  layer = LayerType.local;
+                }
+
                 return _MapGrid(
-                  columns: (viewport.width / cellSize.width).ceil(),
-                  rows: (viewport.height / cellSize.height).ceil(),
+                  //columns: (viewport.width / cellSize.width).ceil(),
+                  //rows: (viewport.height / cellSize.height).ceil(),
+                  columns: columns,
+                  rows: rows,
                   firstColumn: (viewport.left / cellSize.width).floor(),
                   firstRow: (viewport.top / cellSize.height).floor(),
+                  layer: layer,
                 );
               },
             );
@@ -99,6 +117,7 @@ class _MapGrid extends StatelessWidget {
     this.rows,
     this.firstColumn,
     this.firstRow,
+    this.layer,
   }) : super(key: key);
 
   // TODO(justinmc): UI for choosing a seed.
@@ -109,6 +128,7 @@ class _MapGrid extends StatelessWidget {
   final int rows;
   final int firstColumn;
   final int firstRow;
+  final LayerType layer;
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +138,11 @@ class _MapGrid extends StatelessWidget {
           Row(
             children: <Widget>[
               for (int column = firstColumn; column < firstColumn + columns; column++)
-                _MapTile(tileData: _mapData.getTileDataAt(row, column)),
+                _MapTile(tileData: _mapData.getTileDataAt(Location(
+                  row: row,
+                  column: column,
+                  layerType: LayerType.local,
+                ))),
             ],
           ),
       ],
@@ -137,14 +161,19 @@ class _MapTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget child;
-    if (tileData.tileType.layer == Layers.terrestrial && tileData.tileType.terrain.terrainType == Terrains.grassland) {
+    if (tileData.terrain.layer == LayerType.terrestrial && tileData.terrain.terrainType == TerrainType.grassland) {
       child = _Grassland(
-        aOffsets: tileData.aOffsets,
-        bOffsets: tileData.bOffsets,
+        aLocations: tileData.aLocations,
+        bLocations: tileData.bLocations,
       );
+    } else {
+      child = SizedBox.shrink();
+    }
+      /*
     } else {
       throw new FlutterError('Invalid tile type');
     }
+    */
 
     return Container(
       width: cellSize.width,
@@ -159,26 +188,28 @@ class _MapTile extends StatelessWidget {
 
 class _Grassland extends StatelessWidget {
   const _Grassland({
-    this.aOffsets,
-    this.bOffsets,
+    this.aLocations,
+    this.bLocations,
   });
 
-  final List<Offset> aOffsets;
-  final List<Offset> bOffsets;
+  final List<Location> aLocations;
+  final List<Location> bLocations;
 
   @override
   Widget build(BuildContext context) {
     return Stack(
       children: <Widget>[
-        for (Offset offset in aOffsets)
+        for (Location location in aLocations)
           Positioned(
-            left: offset.dx,
-            top: offset.dy,
+            left: location.column * cellSize.width,
+            top: location.row * cellSize.height,
+            // TODO(justinmc): Make this _Grassland widget a generic widget, and
+            // choose child here based on type.
             child: _Grass(),
           ),
         // TODO(justinmc): Something besides grass
           /*
-        for (Offset offset in bOffsets)
+        for (Offset offset in bLocations)
           Positioned(
             left: 50.0,
             top: 0.0,
