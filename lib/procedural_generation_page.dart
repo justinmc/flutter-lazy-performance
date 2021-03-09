@@ -167,7 +167,12 @@ class _MapTile extends StatelessWidget {
         bLocations: tileData.bLocations,
       );
     } else {
-      child = SizedBox.shrink();
+      // TODO(justinmc): Different visuals for different terrains.
+      //child = SizedBox.shrink();
+      child = _Grassland(
+        aLocations: tileData.aLocations,
+        bLocations: tileData.bLocations,
+      );
     }
       /*
     } else {
@@ -201,8 +206,8 @@ class _Grassland extends StatelessWidget {
       children: <Widget>[
         for (Location location in aLocations)
           Positioned(
-            left: location.column * cellSize.width,
-            top: location.row * cellSize.height,
+            left: location.column * cellSize.width / Layer.layerScale,
+            top: location.row * cellSize.height / Layer.layerScale,
             // TODO(justinmc): Make this _Grassland widget a generic widget, and
             // choose child here based on type.
             child: _Grass(),
