@@ -72,7 +72,6 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return InteractiveViewer.builder(
-              constrained: false,
               transformationController: _transformationController,
               maxScale: _maxScale,
               minScale: _minScale,

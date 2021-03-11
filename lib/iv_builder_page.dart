@@ -14,9 +14,6 @@ class IVBuilderPage extends StatefulWidget {
 class _IVBuilderPageState extends State<IVBuilderPage> {
   final TransformationController _transformationController = TransformationController();
 
-  static const double _minScale = 0.5;
-  static const double _maxScale = 2.5;
-  static const double _scaleRange = _maxScale - _minScale;
   static const double _cellWidth = 200.0;
   static const double _cellHeight = 26.0;
 
@@ -69,7 +66,6 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
             return InteractiveViewer.builder(
               alignPanAxis: true,
               scaleEnabled: false,
-              constrained: false,
               transformationController: _transformationController,
               //maxScale: _maxScale,
               //minScale: _minScale,
