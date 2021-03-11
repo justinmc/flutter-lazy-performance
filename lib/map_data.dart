@@ -95,6 +95,18 @@ class TileData {
   String toString() {
     return 'TileData with terrain $terrain';
   }
+
+  @override
+  int get hashCode => location.hashCode;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! TileData) {
+      return false;
+    }
+
+    return other.location == location;
+  }
 }
 
 /*
@@ -249,6 +261,7 @@ enum TerrainType {
   planet,
 }
 
+// Row and column are local to the given layerType.
 class Location {
   const Location({
     this.row,
@@ -275,5 +288,19 @@ class Location {
   @override
   String toString() {
     return 'Location ($row, $column) in layer $layerType';
+  }
+
+  @override
+  int get hashCode => '$row,$column,$layerType'.hashCode;
+
+  @override
+  bool operator ==(dynamic other) {
+    if (other is! Location) {
+      return false;
+    }
+
+    return other.row == row
+        && other.column == column
+        && other.layerType == layerType;
   }
 }

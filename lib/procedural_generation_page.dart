@@ -19,7 +19,7 @@ class ProceduralGenerationPage extends StatefulWidget {
 class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
   final TransformationController _transformationController = TransformationController();
 
-  static const double _minScale = 0.5;
+  static const double _minScale = 0.1;
   static const double _maxScale = 2.5;
   static const double _scaleRange = _maxScale - _minScale;
 
@@ -98,6 +98,7 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
                   firstColumn: (viewport.left / cellSize.width).floor(),
                   firstRow: (viewport.top / cellSize.height).floor(),
                   layer: layer,
+                  viewport: viewport,
                 );
               },
             );
@@ -111,12 +112,12 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
 class _MapGrid extends StatelessWidget {
   _MapGrid({
     Key key,
-    this.viewport,
     this.columns,
     this.rows,
     this.firstColumn,
     this.firstRow,
     this.layer,
+    this.viewport,
   }) : super(key: key);
 
   // TODO(justinmc): UI for choosing a seed.
@@ -129,19 +130,41 @@ class _MapGrid extends StatelessWidget {
   final int firstRow;
   final LayerType layer;
 
+  Rect _cachedViewport;
+  int _firstVisibleColumn;
+  int _firstVisibleRow;
+  int _lastVisibleColumn;
+  int _lastVisibleRow;
+  bool _isCellVisible(int row, int column) {
+    if (viewport != _cachedViewport) {
+      _cachedViewport = viewport;
+      _firstVisibleRow = (viewport.top / cellSize.height).floor();
+      _firstVisibleColumn = (viewport.left / cellSize.width).floor();
+      _lastVisibleRow = (viewport.bottom / cellSize.height).floor();
+      _lastVisibleColumn = (viewport.right / cellSize.width).floor();
+    }
+    return row >= _firstVisibleRow && row <= _lastVisibleRow
+        && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
       children: <Widget>[
-        for (int row = firstRow; row < firstRow + rows; row++)
+        for (int row = 0; row < Layer.layerScale; row++)
           Row(
             children: <Widget>[
-              for (int column = firstColumn; column < firstColumn + columns; column++)
-                _MapTile(tileData: _mapData.getTileDataAt(Location(
-                  row: row,
-                  column: column,
-                  layerType: LayerType.local,
-                ))),
+              // TODO(justinmc): Render visible parent cell and adjacent 8. But
+              // need to be able to position grid when it moves and some are
+              // added/removed.
+              for (int column = 0; column < Layer.layerScale; column++)
+                _isCellVisible(row, column)
+                  ? _MapTile(tileData: _mapData.getTileDataAt(Location(
+                    row: row,
+                    column: column,
+                    layerType: LayerType.local,
+                  )))
+                  : SizedBox(width: cellSize.width, height: cellSize.height),
             ],
           ),
       ],
@@ -162,15 +185,13 @@ class _MapTile extends StatelessWidget {
     Widget child;
     if (tileData.terrain.layer == LayerType.terrestrial && tileData.terrain.terrainType == TerrainType.grassland) {
       child = _Grassland(
-        aLocations: tileData.aLocations,
-        bLocations: tileData.bLocations,
+        tileData: tileData,
       );
     } else {
       // TODO(justinmc): Different visuals for different terrains.
       //child = SizedBox.shrink();
       child = _Grassland(
-        aLocations: tileData.aLocations,
-        bLocations: tileData.bLocations,
+        tileData: tileData,
       );
     }
       /*
@@ -192,35 +213,42 @@ class _MapTile extends StatelessWidget {
 
 class _Grassland extends StatelessWidget {
   const _Grassland({
-    this.aLocations,
-    this.bLocations,
+    this.tileData,
   });
 
-  final List<Location> aLocations;
-  final List<Location> bLocations;
+  final TileData tileData;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: <Widget>[
-        for (Location location in aLocations)
+    return Container(
+      color: Color(0xffa0ffa0),
+      child: Stack(
+        children: <Widget>[
+          // TODO(justinmc): This is for debug, remove.
           Positioned(
-            left: location.column * cellSize.width / Layer.layerScale,
-            top: location.row * cellSize.height / Layer.layerScale,
-            // TODO(justinmc): Make this _Grassland widget a generic widget, and
-            // choose child here based on type.
-            child: _Grass(),
+            top: 0,
+            left: 0,
+            child: Text('${tileData.location.row}, ${tileData.location.column}'),
           ),
-        // TODO(justinmc): Something besides grass
-          /*
-        for (Offset offset in bLocations)
-          Positioned(
-            left: 50.0,
-            top: 0.0,
-            child: _Grass(),
-          ),
-          */
-      ],
+          for (Location location in tileData.aLocations)
+            Positioned(
+              left: location.column * cellSize.width / Layer.layerScale,
+              top: location.row * cellSize.height / Layer.layerScale,
+              // TODO(justinmc): Make this _Grassland widget a generic widget, and
+              // choose child here based on type.
+              child: _Grass(),
+            ),
+          // TODO(justinmc): Something besides grass
+            /*
+          for (Offset offset in bLocations)
+            Positioned(
+              left: 50.0,
+              top: 0.0,
+              child: _Grass(),
+            ),
+            */
+        ],
+      ),
     );
   }
 }
