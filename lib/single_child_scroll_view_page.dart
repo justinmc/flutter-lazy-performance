@@ -4,15 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-class ListViewPage extends StatefulWidget {
-  const ListViewPage({ Key key }) : super(key: key);
+class SingleChildScrollViewPage extends StatefulWidget {
+  const SingleChildScrollViewPage({ Key key }) : super(key: key);
 
   static const String routeName = '/list-view';
 
-  @override _ListViewPageState createState() => _ListViewPageState();
+  @override _SingleChildScrollViewPageState createState() => _SingleChildScrollViewPageState();
 }
 
-class _ListViewPageState extends State<ListViewPage> {
+class _SingleChildScrollViewPageState extends State<SingleChildScrollViewPage> {
   static const _itemCount = 10;
 
   @override
