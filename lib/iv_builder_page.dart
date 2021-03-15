@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
 import 'marty.dart';
-import 'table_builder.dart';
 
 class IVBuilderPage extends StatefulWidget {
   const IVBuilderPage({ Key key }) : super(key: key);
@@ -70,23 +69,22 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
               alignPanAxis: true,
               scaleEnabled: false,
               transformationController: _transformationController,
-              //maxScale: _maxScale,
-              //minScale: _minScale,
               builder: (BuildContext context, Rect viewport) {
-                return TableBuilder(
-                  rowCount: _rowCount,
-                  columnCount: _columnCount,
-                  cellWidth: _cellWidth,
-                  builder: (BuildContext context, int row, int column) {
-                    if (!_isCellVisible(row, column, viewport)) {
-                      return Container(height: _cellHeight);
-                    }
-                    return Container(
-                      height: _cellHeight,
-                      color: row % 2 + column % 2 == 1 ? Colors.white : Colors.grey.withOpacity(0.1),
-                      child: Marty(index: row * _columnCount + column),
-                    );
-                  }
+                return Column(
+                  children: <Widget>[
+                    for (int row = 0; row < _rowCount; row++)
+                      Row(
+                        children: <Widget>[
+                          for (int column = 0; column < _columnCount; column++)
+                            _isCellVisible(row, column, viewport)
+                              ? Container(
+                                height: _cellHeight,
+                                child: Marty(index: row * _columnCount + column),
+                              )
+                              : Container(height: _cellHeight),
+                        ],
+                      ),
+                  ],
                 );
               },
             );
