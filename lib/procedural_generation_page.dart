@@ -1,3 +1,5 @@
+import 'dart:math' show pow;
+
 import 'package:rive/rive.dart';
 
 import 'package:flutter/material.dart';
@@ -79,6 +81,7 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
                 final int columns = (viewport.width / cellSize.width).ceil();
                 final int rows = (viewport.height / cellSize.height).ceil();
 
+                // TODO lots of these calculations are not used right now.
                 LayerType layer;
                 if (columns > 1000 || rows > 1000) {
                   layer = LayerType.galactic;
@@ -149,21 +152,175 @@ class _MapGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // TODO set layertype based on zoom level instead of just doing ".parent".
+    final LayerType parentLayerType = LayerType.terrestrial;
+    final TileData center = _mapData.getLowestTileDataAtScreenOffset(viewport.center).parent;
+
     return Column(
       children: <Widget>[
-        for (int row = 0; row < Layer.layerScale; row++)
+        Row(
+          children: <Widget>[
+            _ParentMapTile(
+              viewport: viewport,
+              tileData: _mapData.getTileDataAt(Location(
+                row: center.location.row - 1,
+                column: center.location.column - 1,
+                layerType: parentLayerType,
+              )),
+            ),
+            _ParentMapTile(
+              viewport: viewport,
+              tileData: _mapData.getTileDataAt(Location(
+                row: center.location.row - 1,
+                column: center.location.column,
+                layerType: parentLayerType,
+              )),
+            ),
+            Container(width: 1000, height: 1000, color: Colors.red.withOpacity(0.3)),
+            /*
+            _ParentMapTile(
+              viewport: viewport,
+              tileData: _mapData.getTileDataAt(Location(
+                row: center.location.row - 1,
+                column: center.location.column + 1,
+                layerType: parentLayerType,
+              )),
+            ),
+            */
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            Container(width: 1000, height: 1000, color: Colors.blue.withOpacity(0.1)),
+            Container(width: 1000, height: 1000, color: Colors.blue.withOpacity(0.2)),
+            Container(width: 1000, height: 1000, color: Colors.blue.withOpacity(0.3)),
+            _ParentMapTile(
+              viewport: viewport,
+              tileData: _mapData.getTileDataAt(Location(
+                row: center.location.row,
+                column: center.location.column - 1,
+                layerType: parentLayerType,
+              )),
+            ),
+            /*
+            _ParentMapTile(
+              viewport: viewport,
+              tileData: center,
+            ),
+            _ParentMapTile(
+              viewport: viewport,
+              tileData: _mapData.getTileDataAt(Location(
+                row: center.location.row,
+                column: center.location.column + 1,
+                layerType: parentLayerType,
+              )),
+            ),
+            */
+          ],
+        ),
+        Row(
+          children: <Widget>[
+            Container(width: 1000, height: 1000, color: Colors.green.withOpacity(0.1)),
+            Container(width: 1000, height: 1000, color: Colors.green.withOpacity(0.2)),
+            Container(width: 1000, height: 1000, color: Colors.green.withOpacity(0.3)),
+            /*
+            _ParentMapTile(
+              viewport: viewport,
+              tileData: _mapData.getTileDataAt(Location(
+                row: center.location.row + 1,
+                column: center.location.column - 1,
+                layerType: parentLayerType,
+              )),
+            ),
+            _ParentMapTile(
+              viewport: viewport,
+              tileData: _mapData.getTileDataAt(Location(
+                row: center.location.row + 1,
+                column: center.location.column,
+                layerType: parentLayerType,
+              )),
+            ),
+            _ParentMapTile(
+              viewport: viewport,
+              tileData: _mapData.getTileDataAt(Location(
+                row: center.location.row + 1,
+                column: center.location.column + 1,
+                layerType: parentLayerType,
+              )),
+            ),
+            */
+          ],
+        ),
+      ],
+    );
+  }
+}
+
+// Render all of the children tiles of the given parent tile.
+class _ParentMapTile extends StatelessWidget {
+  _ParentMapTile({
+    Key key,
+    // Render all the children tiles of this given tile.
+    @required this.tileData,
+    @required this.viewport
+  }) : assert(tileData != null),
+       assert(viewport != null),
+       super(key: key);
+
+  final TileData tileData;
+  final Rect viewport;
+
+  // TODO These variables aren't ok in a stateless widget.
+  // The visibility of child tiles.
+  int _firstRow;
+  int _firstColumn;
+  int _firstVisibleColumn;
+  int _firstVisibleRow;
+  int _lastVisibleColumn;
+  int _lastVisibleRow;
+  void _calculateVisibility() {
+    // Only calculate this once
+    if (_firstVisibleRow != null) {
+      return;
+    }
+
+    int layerExponent = 0;
+    LayerType currentLayerType = layers[tileData.location.layerType].child;
+    while (currentLayerType != null) {
+      layerExponent++;
+      currentLayerType = layers[currentLayerType].child;
+    }
+    final int layerScale = pow(10, layerExponent);
+    _firstRow = tileData.location.row * layerScale;
+    _firstColumn = tileData.location.column * layerScale;
+    _firstRow = (viewport.top / (cellSize.height * layerScale)).floor();
+    _firstVisibleRow = (viewport.top / (cellSize.height * layerScale)).floor();
+    _firstVisibleColumn = (viewport.left / (cellSize.width * layerScale)).floor();
+    _lastVisibleRow = (viewport.bottom / (cellSize.height * layerScale)).floor();
+    _lastVisibleColumn = (viewport.right / (cellSize.width * layerScale)).floor();
+  }
+
+  bool _isCellVisible(int row, int column) {
+    print('justin is $row, $column visible? ${row >= _firstVisibleRow && row <= _lastVisibleRow && column >= _firstVisibleColumn && column <= _lastVisibleColumn} for $_firstVisibleRow - $_lastVisibleRow, $_firstVisibleColumn - $_lastVisibleColumn');
+    return row >= _firstVisibleRow && row <= _lastVisibleRow
+        && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _calculateVisibility();
+
+    return Column(
+      children: <Widget>[
+        for (int row = _firstRow; row < _firstRow + Layer.layerScale; row++)
           Row(
             children: <Widget>[
               // TODO(justinmc): Render visible parent cell and adjacent 8. But
               // need to be able to position grid when it moves and some are
               // added/removed.
-              for (int column = 0; column < Layer.layerScale; column++)
+              for (int column = _firstColumn; column <= _firstColumn + Layer.layerScale; column++)
                 _isCellVisible(row, column)
-                  ? _MapTile(tileData: _mapData.getTileDataAt(Location(
-                    row: row,
-                    column: column,
-                    layerType: LayerType.local,
-                  )))
+                  ? _MapTile(tileData: TileData.getByRowColumn(tileData.children, row, column))
                   : SizedBox(width: cellSize.width, height: cellSize.height),
             ],
           ),
@@ -171,6 +328,7 @@ class _MapGrid extends StatelessWidget {
     );
   }
 }
+
 
 class _MapTile extends StatelessWidget {
   _MapTile({
@@ -230,6 +388,8 @@ class _Grassland extends StatelessWidget {
             left: 0,
             child: Text('${tileData.location.row}, ${tileData.location.column}'),
           ),
+          // TODO bring back grass!
+          /*
           for (Location location in tileData.aLocations)
             Positioned(
               left: location.column * cellSize.width / Layer.layerScale,
@@ -238,6 +398,7 @@ class _Grassland extends StatelessWidget {
               // choose child here based on type.
               child: _Grass(),
             ),
+            */
           // TODO(justinmc): Something besides grass
             /*
           for (Offset offset in bLocations)

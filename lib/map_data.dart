@@ -1,4 +1,5 @@
 import 'dart:math' show Random;
+import 'dart:ui' show Offset;
 
 import 'constants.dart';
 import 'layer.dart';
@@ -13,6 +14,14 @@ class MapData {
   TileData getTileDataAt(Location location) {
     return TileData.generate(location, seed);
   }
+
+  TileData getLowestTileDataAtScreenOffset(Offset offset) {
+    return TileData.generate(Location(
+      row: (offset.dy / Layer.layerScale).floor(),
+      column: (offset.dx / Layer.layerScale).floor(),
+      layerType: LayerType.local,
+    ), seed);
+  }
 }
 
 class TileData {
@@ -21,10 +30,12 @@ class TileData {
     this.aLocations,
     this.bLocations,
     this.parent,
+    this.seed,
     this.terrain,
   }) : assert(location != null),
        assert(aLocations != null),
        assert(bLocations != null),
+       assert(seed != null),
        assert(terrain != null);
 
   factory TileData.generate(Location location, int seed) {
@@ -60,10 +71,14 @@ class TileData {
          ),
     ];
 
+    if ( _terrainToType[terrainType] == null) {
+      print('justin null terrain $terrainType');
+    }
     return TileData(
       location: location,
       aLocations: aLocations,
       bLocations: bLocations,
+      seed: seed,
       terrain: _terrainToType[terrainType],
       parent: parent,
     );
@@ -85,11 +100,30 @@ class TileData {
   static final double _maxX = cellSize.width - 10.0;
   static final double _maxY = cellSize.height - 10.0;
 
+  // Easy way to get a loation by row, column when stored in an iterable by a
+  // 1D index.
+  // TODO pass Location instead of row and column?
+  static TileData getByRowColumn(Iterable<TileData> tileDatas, int row, int column) {
+    return tileDatas.elementAt(row * Layer.layerScale + column);
+  }
+
   final Location location;
   final Iterable<Location> aLocations;
   final Iterable<Location> bLocations;
   final TileData parent;
+  final int seed;
   final Terrain terrain;
+
+  Iterable<TileData> _children;
+  Iterable<TileData> get children {
+    if (_children != null) {
+      return _children;
+    }
+    _children = Iterable.generate(Layer.layerScale * Layer.layerScale, (int index) {
+      return TileData.generate(location.children.elementAt(index), seed);
+    });
+    return _children;
+  }
 
   @override
   String toString() {
@@ -213,6 +247,15 @@ const Map<TerrainType, Terrain> _terrainToType = <TerrainType, Terrain>{
     ],
   ),
 
+  TerrainType.planet: Terrain(
+    terrainType: TerrainType.planet,
+    layer: LayerType.solar,
+    childTerrainTypes: <TerrainType>[
+      TerrainType.ocean,
+      TerrainType.continent,
+    ],
+  ),
+
   TerrainType.solarSpace: Terrain(
     terrainType: TerrainType.solarSpace,
     layer: LayerType.solar,
@@ -263,7 +306,7 @@ enum TerrainType {
 
 // Row and column are local to the given layerType.
 class Location {
-  const Location({
+  Location({
     this.row,
     this.column,
     this.layerType,
@@ -284,6 +327,33 @@ class Location {
   final int row;
   final int column;
   final LayerType layerType;
+
+  // The index goes like this:
+  // 0: (0, 0)
+  // 1: (0, 1)
+  // ...
+  // 9: (0, 9)
+  // 10: (1, 0)
+  // 11: (1, 1)
+  // ...
+  Iterable<Location> _children;
+  Iterable<Location> get children {
+    if (_children != null) {
+      return _children;
+    }
+    assert(layerType != LayerType.local);
+
+    final int startingRow = row * Layer.layerScale;
+    final int startingColumn = column * Layer.layerScale;
+    _children = Iterable.generate(Layer.layerScale * Layer.layerScale, (int index) {
+      return Location(
+        row: startingRow + (index / Layer.layerScale).floor(),
+        column: startingColumn + index % Layer.layerScale,
+        layerType: layers[layerType].child,
+      );
+    });
+    return _children;
+  }
 
   @override
   String toString() {

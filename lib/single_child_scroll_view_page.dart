@@ -1,13 +1,12 @@
-import 'package:rive/rive.dart';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+
+import 'marty.dart';
 
 class SingleChildScrollViewPage extends StatefulWidget {
   const SingleChildScrollViewPage({ Key key }) : super(key: key);
 
-  static const String routeName = '/list-view';
+  static const String routeName = '/single-child-scroll-view';
 
   @override _SingleChildScrollViewPageState createState() => _SingleChildScrollViewPageState();
 }
@@ -34,7 +33,7 @@ class _SingleChildScrollViewPageState extends State<SingleChildScrollViewPage> {
                   Container(
                     height: 200,
                     color: Colors.teal.withOpacity(i / _itemCount),
-                    child: _Marty(
+                    child: Marty(
                       index: i,
                     ),
                   ),
@@ -44,55 +43,5 @@ class _SingleChildScrollViewPageState extends State<SingleChildScrollViewPage> {
         ),
       ),
     );
-  }
-}
-
-class _Marty extends StatefulWidget {
-  const _Marty({
-    Key key,
-    @required this.index,
-  }) : super(key: key);
-
-  final int index;
-
-  @override _MartyState createState() => _MartyState();
-}
-
-class _MartyState extends State<_Marty> {
-  Artboard _riveArtboard;
-  RiveAnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-
-    rootBundle.load('assets/marty_v6.riv').then(
-      (data) async {
-        final file = RiveFile();
-
-        if (file.import(data)) {
-          final artboard = file.mainArtboard;
-          _controller = SimpleAnimation(artboard.animations[widget.index % 2].name);
-          artboard.addController(_controller);
-          setState(() {
-            _riveArtboard = artboard;
-            _controller.isActive = true;
-          });
-        }
-      },
-    );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    print('justin dipose ${widget.index}');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _riveArtboard == null
-      ? const SizedBox()
-      : Rive(artboard: _riveArtboard);
   }
 }

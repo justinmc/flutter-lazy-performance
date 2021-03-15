@@ -1,24 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import 'marty.dart';
 import 'table_builder.dart';
 
-class IVBuilderPage extends StatefulWidget {
-  const IVBuilderPage({ Key key }) : super(key: key);
+class IVBuilderTablePage extends StatefulWidget {
+  const IVBuilderTablePage({ Key key }) : super(key: key);
 
-  static const String routeName = '/iv-builder';
+  static const String routeName = '/iv-builder-table';
 
-  @override _IVBuilderPageState createState() => _IVBuilderPageState();
+  @override _IVBuilderTablePageState createState() => _IVBuilderTablePageState();
 }
 
-class _IVBuilderPageState extends State<IVBuilderPage> {
+class _IVBuilderTablePageState extends State<IVBuilderTablePage> {
   final TransformationController _transformationController = TransformationController();
 
   static const double _cellWidth = 200.0;
-  static const double _cellHeight = 200.0;
-  static const int _rowCount = 60;
-  static const int _columnCount = 10;
+  static const double _cellHeight = 26.0;
 
   // Returns true iff the given cell is currently visible. Caches viewport
   // calculations.
@@ -74,8 +71,8 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
               //minScale: _minScale,
               builder: (BuildContext context, Rect viewport) {
                 return TableBuilder(
-                  rowCount: _rowCount,
-                  columnCount: _columnCount,
+                  rowCount: 60,
+                  columnCount: 6,
                   cellWidth: _cellWidth,
                   builder: (BuildContext context, int row, int column) {
                     if (!_isCellVisible(row, column, viewport)) {
@@ -84,7 +81,10 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
                     return Container(
                       height: _cellHeight,
                       color: row % 2 + column % 2 == 1 ? Colors.white : Colors.grey.withOpacity(0.1),
-                      child: Marty(index: row * _columnCount + column),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('$row x $column'),
+                      ),
                     );
                   }
                 );
@@ -96,3 +96,5 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
     );
   }
 }
+
+

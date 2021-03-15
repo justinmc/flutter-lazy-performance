@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'iv_builder_page.dart';
+import 'iv_builder_table_page.dart';
 import 'list_view_builder_page.dart';
 import 'single_child_scroll_view_page.dart';
 import 'procedural_generation_page.dart';
@@ -25,9 +26,10 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: <String, Widget Function(BuildContext)>{
         '/': (BuildContext context) => MyHomePage(),
-        IVBuilderPage.routeName: (BuildContext context) => IVBuilderPage(),
         SingleChildScrollViewPage.routeName: (BuildContext context) => SingleChildScrollViewPage(),
         ListViewBuilderPage.routeName: (BuildContext context) => ListViewBuilderPage(),
+        IVBuilderPage.routeName: (BuildContext context) => IVBuilderPage(),
+        IVBuilderTablePage.routeName: (BuildContext context) => IVBuilderTablePage(),
         ProceduralGenerationPage.routeName: (BuildContext context) => ProceduralGenerationPage(),
       },
     );
@@ -57,8 +59,13 @@ class MyHomePage extends StatelessWidget {
           ),
           MyListItem(
             route: '/iv-builder',
-            title: 'InteractiveViewer Builder Example',
-            subtitle: 'Build only the visible parts.',
+            title: 'InteractiveViewer Builder Grid Example',
+            subtitle: 'Build only the visible parts of a grid.',
+          ),
+          MyListItem(
+            route: '/iv-builder-table',
+            title: 'InteractiveViewer Builder Table Example',
+            subtitle: 'Build only the visible parts of a table.',
           ),
           MyListItem(
             route: '/procedural-generation',
