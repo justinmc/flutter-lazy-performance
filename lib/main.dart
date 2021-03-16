@@ -50,7 +50,7 @@ class MyHomePage extends StatelessWidget {
       body: ListView(
         children: <Widget>[
           MyListItem(
-            route: '/list-view',
+            route: '/single-child-scroll-view',
             title: 'Naive List Example',
             subtitle: 'Build everything upfront.',
           ),
@@ -70,15 +70,17 @@ class MyHomePage extends StatelessWidget {
             subtitle: 'Build only the visible parts of a grid.',
           ),
           MyListItem(
-            route: '/iv-builder-table',
-            title: 'InteractiveViewer Builder Table Example',
-            subtitle: 'Build only the visible parts of a table.',
-          ),
-          MyListItem(
             route: '/procedural-generation',
             title: 'InteractiveViewer Procedural Generation Example',
             subtitle: 'Generate the content to build.',
           ),
+          /*
+          MyListItem(
+            route: '/iv-builder-table',
+            title: 'InteractiveViewer Builder Table Example',
+            subtitle: 'Build only the visible parts of a table.',
+          ),
+          */
         ],
       ),
     );

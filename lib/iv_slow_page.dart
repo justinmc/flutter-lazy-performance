@@ -16,7 +16,7 @@ class _IVSlowPageState extends State<IVSlowPage> {
 
   static const double _cellWidth = 200.0;
   static const double _cellHeight = 200.0;
-  static const int _rowCount = 60;
+  static const int _rowCount = 10;
   static const int _columnCount = 10;
 
   void _onChangeTransformation() {
@@ -44,28 +44,25 @@ class _IVSlowPageState extends State<IVSlowPage> {
         ],
       ),
       body: Center(
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            return InteractiveViewer(
-              alignPanAxis: true,
-              scaleEnabled: false,
-              transformationController: _transformationController,
-              child: Column(
-                children: <Widget>[
-                  for (int row = 0; row < _rowCount; row++)
-                    Row(
-                      children: <Widget>[
-                        for (int column = 0; column < _columnCount; column++)
-                          Container(
-                            height: _cellHeight,
-                            child: Marty(index: row * _columnCount + column),
-                          ),
-                      ],
-                    ),
-                ],
-              ),
-            );
-          },
+        child: InteractiveViewer(
+          constrained: false,
+          scaleEnabled: false,
+          transformationController: _transformationController,
+          child: Column(
+            children: <Widget>[
+              for (int row = 0; row < _rowCount; row++)
+                Row(
+                  children: <Widget>[
+                    for (int column = 0; column < _columnCount; column++)
+                      Container(
+                        height: _cellHeight,
+                        width: _cellWidth,
+                        child: Marty(index: row * _columnCount + column),
+                      ),
+                  ],
+                ),
+            ],
+          ),
         ),
       ),
     );

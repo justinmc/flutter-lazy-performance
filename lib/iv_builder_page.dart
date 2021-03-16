@@ -16,7 +16,7 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
 
   static const double _cellWidth = 200.0;
   static const double _cellHeight = 200.0;
-  static const int _rowCount = 60;
+  static const int _rowCount = 10;
   static const int _columnCount = 10;
 
   // Returns true iff the given cell is currently visible. Caches viewport
@@ -66,7 +66,6 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
         child: LayoutBuilder(
           builder: (BuildContext context, BoxConstraints constraints) {
             return InteractiveViewer.builder(
-              alignPanAxis: true,
               scaleEnabled: false,
               transformationController: _transformationController,
               builder: (BuildContext context, Rect viewport) {
@@ -79,9 +78,10 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
                             _isCellVisible(row, column, viewport)
                               ? Container(
                                 height: _cellHeight,
+                                width: _cellWidth,
                                 child: Marty(index: row * _columnCount + column),
                               )
-                              : Container(height: _cellHeight),
+                              : Container(width: _cellWidth, height: _cellHeight),
                         ],
                       ),
                   ],
