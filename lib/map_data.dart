@@ -47,8 +47,7 @@ class TileData {
       );
     }
 
-    // TODO(justinmc): Something better than x + y + seed.
-    final Random random = Random(location.row + location.column + seed);
+    final Random random = Random('${location.row},${location.column},$seed'.hashCode);
 
     final TerrainType terrainType = parent == null
         ? _galacticTerrainTypes[random.nextInt(_galacticTerrainTypes.length)]
@@ -63,7 +62,6 @@ class TileData {
          ),
     ];
     final List<Location> bLocations = <Location>[
-      //for (int i = 0; i < random.nextInt(_maxLocations); i++)
       if (random.nextInt(1000) > 988)
         Location(
           row: 1 + random.nextInt(Layer.layerScale - 2),
