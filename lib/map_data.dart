@@ -100,8 +100,12 @@ class TileData {
 
   // Easy way to get a loation by row, column when stored in an iterable by a
   // 1D index.
+  //
+  // row and column are local to the parent, not global location.
   // TODO pass Location instead of row and column?
   static TileData getByRowColumn(Iterable<TileData> tileDatas, int row, int column) {
+    final int index = row * Layer.layerScale + column;
+    assert(index >= 0 && index < tileDatas.length, 'Invalid index $index for tileDatas of length ${tileDatas.length}.');
     return tileDatas.elementAt(row * Layer.layerScale + column);
   }
 

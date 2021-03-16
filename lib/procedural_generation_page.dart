@@ -20,9 +20,7 @@ class ProceduralGenerationPage extends StatefulWidget {
 }
 
 class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
-  final TransformationController _transformationController = TransformationController(
-    Matrix4.identity()..translate(-1000.0, -1000.0),
-  );
+  final TransformationController _transformationController = TransformationController();
 
   static const double _minScale = 0.1;
   static const double _maxScale = 2.5;
@@ -80,6 +78,7 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
               transformationController: _transformationController,
               maxScale: _maxScale,
               minScale: _minScale,
+              boundaryMargin: EdgeInsets.all(double.infinity),
               builder: (BuildContext context, Rect viewport) {
                 final int columns = (viewport.width / cellSize.width).ceil();
                 final int rows = (viewport.height / cellSize.height).ceil();
@@ -104,8 +103,7 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
                   firstColumn: (viewport.left / cellSize.width).floor(),
                   firstRow: (viewport.top / cellSize.height).floor(),
                   layer: layer,
-                  // TODO This translation makes up for the initial transformationController translation.
-                  viewport: viewport.translate(-1000.0, -1000.0),
+                  viewport: viewport,
                 );
               },
             );
@@ -142,14 +140,29 @@ class _MapGrid extends StatelessWidget {
   int _firstVisibleRow;
   int _lastVisibleColumn;
   int _lastVisibleRow;
-  bool _isCellVisible(int row, int column) {
+  bool _isCellVisible(int row, int column, final LayerType layerType) {
+    // TODO Deduplicate with other _isCellVisible.
+    // TODO(justinmc): Make sure this works when tileData.location.layerType is local.
     if (viewport != _cachedViewport) {
       _cachedViewport = viewport;
-      _firstVisibleRow = (viewport.top / cellSize.height).floor();
-      _firstVisibleColumn = (viewport.left / cellSize.width).floor();
-      _lastVisibleRow = (viewport.bottom / cellSize.height).floor();
-      _lastVisibleColumn = (viewport.right / cellSize.width).floor();
+      int layerExponent = 0;
+      LayerType currentLayerType = layers[layerType].child;
+      while (currentLayerType != null) {
+        layerExponent++;
+        currentLayerType = layers[currentLayerType].child;
+      }
+      final int layerScale = pow(10, layerExponent);
+      _firstVisibleRow = (viewport.top / (cellSize.height * layerScale)).floor();
+      _firstVisibleColumn = (viewport.left / (cellSize.width * layerScale)).floor();
+      _lastVisibleRow = (viewport.bottom / (cellSize.height * layerScale)).floor();
+      _lastVisibleColumn = (viewport.right / (cellSize.width * layerScale)).floor();
     }
+
+    /*
+    final bool visible = row >= _firstVisibleRow && row <= _lastVisibleRow
+        && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
+    print('justin is $row, $column visible? $visible b/c firsts $_firstVisibleRow - $_lastVisibleRow, $_firstVisibleColumn - $_lastVisibleColumn for $viewport');
+    */
     return row >= _firstVisibleRow && row <= _lastVisibleRow
         && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
   }
@@ -160,109 +173,55 @@ class _MapGrid extends StatelessWidget {
     final LayerType parentLayerType = LayerType.terrestrial;
     final TileData center = _mapData.getLowestTileDataAtScreenOffset(viewport.center).parent;
 
-    return Column(
-      children: <Widget>[
-        Row(
-          children: <Widget>[
-            Container(width: 1000, height: 1000, color: Colors.red.withOpacity(0.1)),
-            Container(width: 1000, height: 1000, color: Colors.red.withOpacity(0.2)),
-            Container(width: 1000, height: 1000, color: Colors.red.withOpacity(0.3)),
-            /*
-            _ParentMapTile(
-              viewport: viewport,
-              tileData: _mapData.getTileDataAt(Location(
-                row: center.location.row - 1,
-                column: center.location.column - 1,
-                layerType: parentLayerType,
-              )),
+    final Size size = Size(
+      Layer.layerScale * cellSize.width,
+      Layer.layerScale * cellSize.height,
+    );
+
+    // TODO Can I use keys to avoid rebuilding _ParentMapTiles here?
+    return Container(
+      width: size.width * 3,
+      height: size.height * 3,
+      clipBehavior: Clip.none,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: <Widget>[
+          Positioned(
+            top: center.location.row * size.width - 1000.0,
+            left: center.location.column * size.height - 1000.0,
+            child: Column(
+              children: <Widget>[
+                for (int row = center.location.row - 1; row <= center.location.row + 1; row++)
+                  Row(
+                    children: <Widget>[
+                      for (int column = center.location.column - 1; column <= center.location.column + 1; column++)
+                        // TODO(justinmc): Dynamically get layer type.
+                        _isCellVisible(row, column, LayerType.terrestrial)
+                          ? _ParentMapTile(
+                            viewport: viewport,
+                            tileData: _mapData.getTileDataAt(Location(
+                              row: row,
+                              column: column,
+                              layerType: parentLayerType,
+                            )),
+                          )
+                          : Container(
+                              width: size.width,
+                              height: size.height,
+                              color: Colors.green.withOpacity(0.3),
+                              /*
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.black)
+                              ),
+                              */
+                            ),
+                    ],
+                  ),
+              ],
             ),
-            _ParentMapTile(
-              viewport: viewport,
-              tileData: _mapData.getTileDataAt(Location(
-                row: center.location.row - 1,
-                column: center.location.column,
-                layerType: parentLayerType,
-              )),
-            ),
-            Container(width: 1000, height: 1000, color: Colors.red.withOpacity(0.3)),
-            _ParentMapTile(
-              viewport: viewport,
-              tileData: _mapData.getTileDataAt(Location(
-                row: center.location.row - 1,
-                column: center.location.column + 1,
-                layerType: parentLayerType,
-              )),
-            ),
-            */
-          ],
-        ),
-        Row(
-          children: <Widget>[
-            Container(width: 1000, height: 1000, color: Colors.blue.withOpacity(0.1)),
-            //Container(width: 1000, height: 1000, color: Colors.blue.withOpacity(0.2)),
-            _ParentMapTile(
-              viewport: viewport,
-              tileData: center,
-            ),
-            Container(width: 1000, height: 1000, color: Colors.blue.withOpacity(0.3)),
-            /*
-            _ParentMapTile(
-              viewport: viewport,
-              tileData: _mapData.getTileDataAt(Location(
-                row: center.location.row,
-                column: center.location.column - 1,
-                layerType: parentLayerType,
-              )),
-            ),
-            _ParentMapTile(
-              viewport: viewport,
-              tileData: center,
-            ),
-            _ParentMapTile(
-              viewport: viewport,
-              tileData: _mapData.getTileDataAt(Location(
-                row: center.location.row,
-                column: center.location.column + 1,
-                layerType: parentLayerType,
-              )),
-            ),
-            */
-          ],
-        ),
-        Row(
-          children: <Widget>[
-            Container(width: 1000, height: 1000, color: Colors.green.withOpacity(0.1)),
-            Container(width: 1000, height: 1000, color: Colors.green.withOpacity(0.2)),
-            Container(width: 1000, height: 1000, color: Colors.green.withOpacity(0.3)),
-            /*
-            _ParentMapTile(
-              viewport: viewport,
-              tileData: _mapData.getTileDataAt(Location(
-                row: center.location.row + 1,
-                column: center.location.column - 1,
-                layerType: parentLayerType,
-              )),
-            ),
-            _ParentMapTile(
-              viewport: viewport,
-              tileData: _mapData.getTileDataAt(Location(
-                row: center.location.row + 1,
-                column: center.location.column,
-                layerType: parentLayerType,
-              )),
-            ),
-            _ParentMapTile(
-              viewport: viewport,
-              tileData: _mapData.getTileDataAt(Location(
-                row: center.location.row + 1,
-                column: center.location.column + 1,
-                layerType: parentLayerType,
-              )),
-            ),
-            */
-          ],
-        ),
-      ],
+          ),
+        ],
+      ),
     );
   }
 }
@@ -314,8 +273,12 @@ class _ParentMapTile extends StatelessWidget {
 
   bool _isCellVisible(int row, int column) {
     //print('justin is $row, $column visible in $viewport for tiledata ${tileData.location}? ${row >= _firstVisibleRow && row <= _lastVisibleRow && column >= _firstVisibleColumn && column <= _lastVisibleColumn} for $_firstVisibleRow - $_lastVisibleRow, $_firstVisibleColumn - $_lastVisibleColumn, firstRow,col $_firstRow, $_firstColumn');
-    return row >= _firstVisibleRow && row <= _lastVisibleRow
+    //return row >= _firstVisibleRow && row <= _lastVisibleRow
+    //    && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
+    final bool visible = row >= _firstVisibleRow && row <= _lastVisibleRow
         && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
+    //print('justin $row, $column is visible? $visible');
+    return visible;
   }
 
   @override
@@ -327,12 +290,9 @@ class _ParentMapTile extends StatelessWidget {
         for (int row = _firstRow; row < _firstRow + Layer.layerScale; row++)
           Row(
             children: <Widget>[
-              // TODO(justinmc): Render visible parent cell and adjacent 8. But
-              // need to be able to position grid when it moves and some are
-              // added/removed.
               for (int column = _firstColumn; column < _firstColumn + Layer.layerScale; column++)
                 _isCellVisible(row, column)
-                  ? _MapTile(tileData: TileData.getByRowColumn(tileData.children, row, column))
+                  ? _MapTile(tileData: TileData.getByRowColumn(tileData.children, row % Layer.layerScale, column % Layer.layerScale))
                   : SizedBox(width: cellSize.width, height: cellSize.height),
             ],
           ),
