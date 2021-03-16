@@ -8,9 +8,11 @@ class Marty extends StatefulWidget {
   const Marty({
     Key key,
     @required this.index,
+    this.isBackgroundTransparent = false,
   }) : super(key: key);
 
   final int index;
+  final bool isBackgroundTransparent;
 
   @override _MartyState createState() => _MartyState();
 }
@@ -23,7 +25,10 @@ class _MartyState extends State<Marty> {
   void initState() {
     super.initState();
 
-    rootBundle.load('assets/marty_v6.riv').then(
+    final String asset = widget.isBackgroundTransparent
+        ? 'assets/marty_transparent.riv'
+        : 'assets/marty_v6.riv';
+    rootBundle.load(asset).then(
       (data) async {
         final file = RiveFile();
 

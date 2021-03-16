@@ -17,8 +17,8 @@ class MapData {
 
   TileData getLowestTileDataAtScreenOffset(Offset offset) {
     return TileData.generate(Location(
-      row: (offset.dy / Layer.layerScale).floor(),
-      column: (offset.dx / Layer.layerScale).floor(),
+      row: (offset.dy / cellSize.height).floor(),
+      column: (offset.dx / cellSize.width).floor(),
       layerType: LayerType.local,
     ), seed);
   }
@@ -57,23 +57,21 @@ class TileData {
     final List<Location> aLocations = <Location>[
       for(int i = 0; i < random.nextInt(_maxLocations); i++)
          Location(
-           row: random.nextInt(Layer.layerScale),
-           column: random.nextInt(Layer.layerScale),
+           row: 1 + random.nextInt(Layer.layerScale - 2),
+           column: 1 + random.nextInt(Layer.layerScale - 2),
            layerType: location.layerType,
          ),
     ];
     final List<Location> bLocations = <Location>[
-      for (int i = 0; i < random.nextInt(_maxLocations); i++)
-         Location(
-           row: random.nextInt(Layer.layerScale),
-           column: random.nextInt(Layer.layerScale),
-           layerType: location.layerType,
-         ),
+      //for (int i = 0; i < random.nextInt(_maxLocations); i++)
+      if (random.nextInt(1000) > 988)
+        Location(
+          row: 1 + random.nextInt(Layer.layerScale - 2),
+          column: 1 + random.nextInt(Layer.layerScale - 2),
+          layerType: location.layerType,
+        ),
     ];
 
-    if ( _terrainToType[terrainType] == null) {
-      print('justin null terrain $terrainType');
-    }
     return TileData(
       location: location,
       aLocations: aLocations,
@@ -96,7 +94,7 @@ class TileData {
   }
   */
 
-  static const int _maxLocations = 8;
+  static const int _maxLocations = 3;
   static final double _maxX = cellSize.width - 10.0;
   static final double _maxY = cellSize.height - 10.0;
 
