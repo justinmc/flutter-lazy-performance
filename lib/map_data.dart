@@ -104,7 +104,7 @@ class TileData {
   static TileData getByRowColumn(Iterable<TileData> tileDatas, int row, int column) {
     final int index = row * Layer.layerScale + column;
     assert(index >= 0 && index < tileDatas.length, 'Invalid index $index for tileDatas of length ${tileDatas.length}.');
-    return tileDatas.elementAt(row * Layer.layerScale + column);
+    return tileDatas.elementAt(index);
   }
 
   final Location location;

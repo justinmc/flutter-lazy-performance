@@ -1,4 +1,4 @@
-import 'dart:math' show pow;
+import 'dart:math' show pow, max;
 
 import 'package:rive/rive.dart';
 
@@ -23,7 +23,7 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
   final TransformationController _transformationController = TransformationController();
 
   static const double _minScale = 0.1;
-  static const double _maxScale = 2.5;
+  static const double _maxScale = 10.5;
   static const double _scaleRange = _maxScale - _minScale;
 
   /*
@@ -169,14 +169,29 @@ class _MapGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // TODO set layertype based on zoom level instead of just doing ".parent".
-    final LayerType parentLayerType = LayerType.terrestrial;
-    final TileData center = _mapData.getLowestTileDataAtScreenOffset(viewport.center).parent;
+    LayerType parentLayerType;
+    if (max(viewport.width, viewport.height) < 100) {
+      parentLayerType = LayerType.local;
+    } else if (max(viewport.width, viewport.height) < 1000) {
+      parentLayerType = LayerType.terrestrial;
+    } else if (max(viewport.width, viewport.height) < 10000) {
+      parentLayerType = LayerType.solar;
+    } else {
+      parentLayerType = LayerType.galactic;
+    }
+    //final TileData center = _mapData.getLowestTileDataAtScreenOffset(viewport.center).parent;
+    TileData center = _mapData.getLowestTileDataAtScreenOffset(viewport.center);
+    while (center.location.layerType != parentLayerType) {
+      assert(center.location.layerType != null);
+      center = center.parent;
+    }
 
     final Size size = Size(
-      Layer.layerScale * cellSize.width,
-      Layer.layerScale * cellSize.height,
+      cellSize.width * pow(Layer.layerScale, layers[parentLayerType].level),
+      cellSize.height * pow(Layer.layerScale, layers[parentLayerType].level),
     );
+
+    //print('justin I think the big tiles should be at layer $parentLayerType and center is ${center.location} at ${viewport.center}, size $size');
 
     // TODO Can I use keys to avoid rebuilding _ParentMapTiles here?
     return Container(
@@ -187,8 +202,8 @@ class _MapGrid extends StatelessWidget {
         clipBehavior: Clip.none,
         children: <Widget>[
           Positioned(
-            top: center.location.row * size.width - 1000.0,
-            left: center.location.column * size.height - 1000.0,
+            top: center.location.row * size.width - size.width,
+            left: center.location.column * size.height - size.height,
             child: Column(
               children: <Widget>[
                 for (int row = center.location.row - 1; row <= center.location.row + 1; row++)
@@ -196,7 +211,7 @@ class _MapGrid extends StatelessWidget {
                     children: <Widget>[
                       for (int column = center.location.column - 1; column <= center.location.column + 1; column++)
                         // TODO(justinmc): Dynamically get layer type.
-                        _isCellVisible(row, column, LayerType.terrestrial)
+                        _isCellVisible(row, column, parentLayerType)
                           ? _ParentMapTile(
                             viewport: viewport,
                             tileData: _mapData.getTileDataAt(Location(
@@ -249,18 +264,21 @@ class _ParentMapTile extends StatelessWidget {
   int _lastVisibleColumn;
   int _lastVisibleRow;
   void _calculateVisibility() {
-    // Only calculate this once.
-    if (_firstVisibleRow != null) {
+    // Only calculate this once. Also, not needed at all for local.
+    if (_firstVisibleRow != null || tileData.location.layerType == LayerType.local) {
       return;
     }
 
-    // TODO(justinmc): Make sure this works when tileData.location.layerType is local.
+    final int layerExponent = layers[tileData.location.layerType].level;
+    /*
     int layerExponent = 0;
     LayerType currentLayerType = layers[tileData.location.layerType].child;
     while (currentLayerType != null) {
       layerExponent++;
       currentLayerType = layers[currentLayerType].child;
     }
+    print('justin layerExponent $layerExponent vs $quickLayerExponent');
+    */
     final int layerScale = pow(10, layerExponent);
     final int childLayerScale = pow(10, layerExponent - 1);
     _firstRow = tileData.location.row * layerScale;
@@ -284,6 +302,11 @@ class _ParentMapTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     _calculateVisibility();
+
+    // Local tiles have no children. Just render one big _MapTile.
+    if (tileData.location.layerType == LayerType.local) {
+      return _MapTile(tileData: tileData);
+    }
 
     return Column(
       children: <Widget>[
