@@ -22,30 +22,8 @@ class ProceduralGenerationPage extends StatefulWidget {
 class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
   final TransformationController _transformationController = TransformationController();
 
-  static const double _minScale = 0.1;
+  static const double _minScale = 0.01; // TODO could do even more.
   static const double _maxScale = 10.5;
-  static const double _scaleRange = _maxScale - _minScale;
-
-  /*
-  // Returns true iff the given cell is currently visible. Caches viewport
-  // calculations.
-  Rect _cachedViewport;
-  int _firstVisibleColumn;
-  int _firstVisibleRow;
-  int _lastVisibleColumn;
-  int _lastVisibleRow;
-  bool _isCellVisible(int row, int column, Rect viewport) {
-    if (viewport != _cachedViewport) {
-      _cachedViewport = viewport;
-      _firstVisibleRow = (viewport.top / _cellHeight).floor();
-      _firstVisibleColumn = (viewport.left / _cellWidth).floor();
-      _lastVisibleRow = (viewport.bottom / _cellHeight).floor();
-      _lastVisibleColumn = (viewport.right / _cellWidth).floor();
-    }
-    return row >= _firstVisibleRow && row <= _lastVisibleRow
-        && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
-  }
-  */
 
   void _onChangeTransformation() {
     setState(() {});
@@ -179,18 +157,13 @@ class _MapGrid extends StatelessWidget {
     } else {
       parentLayerType = LayerType.galactic;
     }
-    //final TileData center = _mapData.getLowestTileDataAtScreenOffset(viewport.center).parent;
     TileData center = _mapData.getLowestTileDataAtScreenOffset(viewport.center);
     while (center.location.layerType != parentLayerType) {
       assert(center.location.layerType != null);
       center = center.parent;
     }
 
-    final Size size = Size(
-      cellSize.width * pow(Layer.layerScale, layers[parentLayerType].level),
-      cellSize.height * pow(Layer.layerScale, layers[parentLayerType].level),
-    );
-
+    final Size size = layers[parentLayerType].size;
     //print('justin I think the big tiles should be at layer $parentLayerType and center is ${center.location} at ${viewport.center}, size $size');
 
     // TODO Can I use keys to avoid rebuilding _ParentMapTiles here?
@@ -270,19 +243,9 @@ class _ParentMapTile extends StatelessWidget {
     }
 
     final int layerExponent = layers[tileData.location.layerType].level;
-    /*
-    int layerExponent = 0;
-    LayerType currentLayerType = layers[tileData.location.layerType].child;
-    while (currentLayerType != null) {
-      layerExponent++;
-      currentLayerType = layers[currentLayerType].child;
-    }
-    print('justin layerExponent $layerExponent vs $quickLayerExponent');
-    */
-    final int layerScale = pow(10, layerExponent);
     final int childLayerScale = pow(10, layerExponent - 1);
-    _firstRow = tileData.location.row * layerScale;
-    _firstColumn = tileData.location.column * layerScale;
+    _firstRow = tileData.location.row * Layer.layerScale;
+    _firstColumn = tileData.location.column * Layer.layerScale;
     _firstVisibleRow = (viewport.top / (cellSize.height * childLayerScale)).floor();
     _firstVisibleColumn = (viewport.left / (cellSize.width * childLayerScale)).floor();
     _lastVisibleRow = (viewport.bottom / (cellSize.height * childLayerScale)).floor();
@@ -290,8 +253,6 @@ class _ParentMapTile extends StatelessWidget {
   }
 
   bool _isCellVisible(int row, int column) {
-    //print('justin is $row, $column visible in $viewport for tiledata ${tileData.location}? ${row >= _firstVisibleRow && row <= _lastVisibleRow && column >= _firstVisibleColumn && column <= _lastVisibleColumn} for $_firstVisibleRow - $_lastVisibleRow, $_firstVisibleColumn - $_lastVisibleColumn, firstRow,col $_firstRow, $_firstColumn');
-    //return row >= _firstVisibleRow && row <= _lastVisibleRow
     //    && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
     final bool visible = row >= _firstVisibleRow && row <= _lastVisibleRow
         && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
@@ -308,6 +269,9 @@ class _ParentMapTile extends StatelessWidget {
       return _MapTile(tileData: tileData);
     }
 
+    final Layer parentLayer = layers[tileData.location.layerType];
+    final Size size = layers[parentLayer.child].size;
+
     return Column(
       children: <Widget>[
         for (int row = _firstRow; row < _firstRow + Layer.layerScale; row++)
@@ -316,7 +280,7 @@ class _ParentMapTile extends StatelessWidget {
               for (int column = _firstColumn; column < _firstColumn + Layer.layerScale; column++)
                 _isCellVisible(row, column)
                   ? _MapTile(tileData: TileData.getByRowColumn(tileData.children, row % Layer.layerScale, column % Layer.layerScale))
-                  : SizedBox(width: cellSize.width, height: cellSize.height),
+                  : SizedBox(width: size.width, height: size.height),
             ],
           ),
       ],
@@ -333,50 +297,81 @@ class _MapTile extends StatelessWidget {
 
   final TileData tileData;
 
+  Color get color {
+    switch (tileData.terrain.terrainType) {
+      case TerrainType.grassland:
+        return Color(0xffa0ffa0);
+      case TerrainType.continent:
+        return Colors.lightGreenAccent;
+      case TerrainType.planet:
+        return Colors.purple;
+      case TerrainType.solarSpace:
+      case TerrainType.localSpace:
+      case TerrainType.galacticSpace:
+      case TerrainType.terrestrialSpace:
+        return Colors.black;
+      case TerrainType.star:
+      case TerrainType.solarSystem:
+      case TerrainType.localStar:
+      case TerrainType.terrestrialStar:
+        return Colors.yellow;
+      case TerrainType.water:
+      case TerrainType.ocean:
+        return Colors.blue;
+    }
+  }
+
+  // TODO More a/bLocations
+  Widget get _aLocation {
+    switch (tileData.terrain.terrainType) {
+      case TerrainType.grassland:
+      case TerrainType.continent:
+      case TerrainType.planet:
+      case TerrainType.solarSpace:
+      case TerrainType.localSpace:
+      case TerrainType.galacticSpace:
+      case TerrainType.terrestrialSpace:
+      case TerrainType.star:
+      case TerrainType.solarSystem:
+      case TerrainType.localStar:
+      case TerrainType.terrestrialStar:
+      case TerrainType.water:
+      case TerrainType.ocean:
+        return _Grass();
+    }
+  }
+
+  Widget get _bLocation {
+    switch (tileData.terrain.terrainType) {
+      case TerrainType.grassland:
+      case TerrainType.continent:
+      case TerrainType.planet:
+      case TerrainType.solarSpace:
+      case TerrainType.localSpace:
+      case TerrainType.galacticSpace:
+      case TerrainType.terrestrialSpace:
+      case TerrainType.star:
+      case TerrainType.solarSystem:
+      case TerrainType.localStar:
+      case TerrainType.terrestrialStar:
+      case TerrainType.water:
+      case TerrainType.ocean:
+        return Marty(index: 0, isBackgroundTransparent: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    Widget child;
-    if (tileData.terrain.layer == LayerType.terrestrial && tileData.terrain.terrainType == TerrainType.grassland) {
-      child = _Grassland(
-        tileData: tileData,
-      );
-    } else {
-      // TODO(justinmc): Different visuals for different terrains.
-      //child = SizedBox.shrink();
-      child = _Grassland(
-        tileData: tileData,
-      );
-    }
-      /*
-    } else {
-      throw new FlutterError('Invalid tile type');
-    }
-    */
-
+    //print('justin build map tile ${tileData.location.layerType} ${tileData.terrain.terrainType} of size ${tileData.size} and color $color');
     return Container(
-      width: cellSize.width,
-      height: cellSize.height,
+      width: tileData.size.width,
+      height: tileData.size.height,
       /*
       decoration: BoxDecoration(
         border: Border.all(color: Colors.black)
       ),
       */
-      child: child,
-    );
-  }
-}
-
-class _Grassland extends StatelessWidget {
-  const _Grassland({
-    this.tileData,
-  });
-
-  final TileData tileData;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Color(0xffa0ffa0),
+      color: color,
       child: Stack(
         children: <Widget>[
           // TODO(justinmc): This is for debug, remove.
@@ -385,16 +380,12 @@ class _Grassland extends StatelessWidget {
             left: 0,
             child: Text('${tileData.location.row}, ${tileData.location.column}'),
           ),
-          // TODO bring back grass!
           for (Location location in tileData.aLocations)
             Positioned(
               left: location.column * cellSize.width / Layer.layerScale,
               top: location.row * cellSize.height / Layer.layerScale,
-              // TODO(justinmc): Make this _Grassland widget a generic widget, and
-              // choose child here based on type.
-              child: _Grass(),
+              child: _aLocation,
             ),
-          // TODO(justinmc): Something besides grass
           for (Location location in tileData.bLocations)
             Positioned(
                 /*
@@ -408,7 +399,7 @@ class _Grassland extends StatelessWidget {
               child: SizedBox(
                 width: 50.0,
                 height: 50.0,
-                child: Marty(index: 0, isBackgroundTransparent: true),
+                child: _bLocation,
               ),
             ),
         ],

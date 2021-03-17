@@ -1,3 +1,8 @@
+import 'dart:ui' show Size;
+import 'dart:math' show pow;
+
+import 'constants.dart';
+
 enum LayerType {
   local,
   terrestrial,
@@ -21,6 +26,13 @@ class Layer {
   final LayerType child;
   final double scale;
   final int level;
+
+  Size get size {
+    return Size(
+      cellSize.width * pow(Layer.layerScale, level),
+      cellSize.height * pow(Layer.layerScale, level),
+    );
+  }
 }
 
 final Map<LayerType, Layer> layers = <LayerType, Layer>{

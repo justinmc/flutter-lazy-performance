@@ -1,5 +1,5 @@
 import 'dart:math' show Random;
-import 'dart:ui' show Offset;
+import 'dart:ui' show Offset, Size;
 
 import 'constants.dart';
 import 'layer.dart';
@@ -49,9 +49,17 @@ class TileData {
 
     final Random random = Random('${location.row},${location.column},$seed'.hashCode);
 
+    final Location solarOrigin = Location(
+      row: 0,
+      column: 0,
+      layerType: LayerType.solar,
+    );
     final TerrainType terrainType = parent == null
         ? _galacticTerrainTypes[random.nextInt(_galacticTerrainTypes.length)]
-        : parent.terrain.childTerrainTypes[random.nextInt(parent.terrain.childTerrainTypes.length)];
+        // Always start the origin as grassland.
+        : parent.location == solarOrigin
+            ? TerrainType.continent
+            : parent.terrain.childTerrainTypes[random.nextInt(parent.terrain.childTerrainTypes.length)];
 
     final List<Location> aLocations = <Location>[
       for(int i = 0; i < random.nextInt(_maxLocations); i++)
@@ -80,21 +88,7 @@ class TileData {
     );
   }
 
-  /*
-  TileData generateChild(Location location) {
-    if (layerType != LayerType.galactic) {
-      parent = TileData.generate(
-        location.parent,
-        layers[layerType].parent,
-        seed,
-      );
-    }
-  }
-  */
-
   static const int _maxLocations = 3;
-  static final double _maxX = cellSize.width - 10.0;
-  static final double _maxY = cellSize.height - 10.0;
 
   // Easy way to get a loation by row, column when stored in an iterable by a
   // 1D index.
@@ -124,6 +118,8 @@ class TileData {
     });
     return _children;
   }
+
+  Size get size => layers[location.layerType].size;
 
   @override
   String toString() {
