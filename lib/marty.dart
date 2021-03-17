@@ -20,6 +20,7 @@ class Marty extends StatefulWidget {
 class _MartyState extends State<Marty> {
   Artboard _riveArtboard;
   RiveAnimationController _controller;
+  bool _disposed = false;
 
   @override
   void initState() {
@@ -30,6 +31,9 @@ class _MartyState extends State<Marty> {
         : 'assets/marty_v6.riv';
     rootBundle.load(asset).then(
       (data) async {
+        if (_disposed) {
+          return;
+        }
         final file = RiveFile();
 
         if (file.import(data)) {
@@ -45,13 +49,12 @@ class _MartyState extends State<Marty> {
     );
   }
 
-  /*
   @override
   void dispose() {
+    _disposed = true;
     super.dispose();
-    print('justin dipose ${widget.index}');
+    //print('justin dipose ${widget.index}');
   }
-  */
 
   @override
   Widget build(BuildContext context) {
