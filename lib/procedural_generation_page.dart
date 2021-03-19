@@ -1,14 +1,15 @@
 import 'dart:math' show pow, max;
 
-import 'package:rive/rive.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
+import 'package:rive/rive.dart';
+import 'package:vector_math/vector_math_64.dart' show Quad;
 
 import 'constants.dart';
 import 'cloud.dart';
 import 'fire.dart';
+import 'helpers.dart';
 import 'layer.dart';
 import 'map_data.dart';
 import 'marty.dart';
@@ -63,31 +64,9 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
               maxScale: _maxScale,
               minScale: _minScale,
               boundaryMargin: EdgeInsets.all(double.infinity),
-              builder: (BuildContext context, Rect viewport) {
-                final int columns = (viewport.width / cellSize.width).ceil();
-                final int rows = (viewport.height / cellSize.height).ceil();
-
-                // TODO lots of these calculations are not used right now.
-                LayerType layer;
-                if (columns > 1000 || rows > 1000) {
-                  layer = LayerType.galactic;
-                } else if (columns > 100 || rows > 100) {
-                  layer = LayerType.solar;
-                } else if (columns > 10 || rows > 10) {
-                  layer = LayerType.terrestrial;
-                } else {
-                  layer = LayerType.local;
-                }
-
+              builder: (BuildContext context, Quad viewport) {
                 return _MapGrid(
-                  //columns: (viewport.width / cellSize.width).ceil(),
-                  //rows: (viewport.height / cellSize.height).ceil(),
-                  columns: columns,
-                  rows: rows,
-                  firstColumn: (viewport.left / cellSize.width).floor(),
-                  firstRow: (viewport.top / cellSize.height).floor(),
-                  layer: layer,
-                  viewport: viewport,
+                  viewport: axisAlignedBoundingBox(viewport),
                 );
               },
             );
@@ -101,23 +80,12 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
 class _MapGrid extends StatelessWidget {
   _MapGrid({
     Key key,
-    this.columns,
-    this.rows,
-    this.firstColumn,
-    this.firstRow,
-    this.layer,
     this.viewport,
   }) : super(key: key);
 
   // TODO(justinmc): UI for choosing a seed.
   final MapData _mapData = MapData(seed: 80);
   final Rect viewport;
-
-  final int columns;
-  final int rows;
-  final int firstColumn;
-  final int firstRow;
-  final LayerType layer;
 
   Rect _cachedViewport;
   int _firstVisibleColumn;

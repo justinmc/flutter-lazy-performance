@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:vector_math/vector_math_64.dart' show Quad;
 
+import 'helpers.dart';
 import 'marty.dart';
 
 class IVBuilderPage extends StatefulWidget {
@@ -21,18 +23,19 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
 
   // Returns true iff the given cell is currently visible. Caches viewport
   // calculations.
-  Rect _cachedViewport;
+  Quad _cachedViewport;
   int _firstVisibleColumn;
   int _firstVisibleRow;
   int _lastVisibleColumn;
   int _lastVisibleRow;
-  bool _isCellVisible(int row, int column, Rect viewport) {
+  bool _isCellVisible(int row, int column, Quad viewport) {
     if (viewport != _cachedViewport) {
+      final Rect aabb = axisAlignedBoundingBox(viewport);
       _cachedViewport = viewport;
-      _firstVisibleRow = (viewport.top / _cellHeight).floor();
-      _firstVisibleColumn = (viewport.left / _cellWidth).floor();
-      _lastVisibleRow = (viewport.bottom / _cellHeight).floor();
-      _lastVisibleColumn = (viewport.right / _cellWidth).floor();
+      _firstVisibleRow = (aabb.top / _cellHeight).floor();
+      _firstVisibleColumn = (aabb.left / _cellWidth).floor();
+      _lastVisibleRow = (aabb.bottom / _cellHeight).floor();
+      _lastVisibleColumn = (aabb.right / _cellWidth).floor();
     }
     return row >= _firstVisibleRow && row <= _lastVisibleRow
         && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
@@ -68,7 +71,7 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
             return InteractiveViewer.builder(
               scaleEnabled: false,
               transformationController: _transformationController,
-              builder: (BuildContext context, Rect viewport) {
+              builder: (BuildContext context, Quad viewport) {
                 return Column(
                   children: <Widget>[
                     for (int row = 0; row < _rowCount; row++)
