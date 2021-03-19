@@ -13,6 +13,7 @@ import 'map_data.dart';
 import 'marty.dart';
 import 'planet.dart';
 import 'star.dart';
+import 'star_close.dart';
 import 'wave.dart';
 
 class ProceduralGenerationPage extends StatefulWidget {
@@ -26,7 +27,7 @@ class ProceduralGenerationPage extends StatefulWidget {
 class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
   final TransformationController _transformationController = TransformationController();
 
-  static const double _minScale = 0.01; // TODO could do even more.
+  static const double _minScale = 0.001; // TODO could do even more.
   static const double _maxScale = 10.5;
 
   void _onChangeTransformation() {
@@ -312,8 +313,8 @@ class _MapTile extends StatelessWidget {
       case TerrainType.galacticSpace:
       case TerrainType.localSpace:
       case TerrainType.terrestrialSpace:
-        return Colors.black;
       case TerrainType.star:
+        return Colors.black;
       case TerrainType.solarSystem:
       case TerrainType.terrestrialStar:
       case TerrainType.localStar:
@@ -329,10 +330,9 @@ class _MapTile extends StatelessWidget {
     switch (tileData.terrain.terrainType) {
       case TerrainType.grassland:
       case TerrainType.continent:
-      case TerrainType.solarSystem:
-      case TerrainType.ocean:
         return _Grass();
       case TerrainType.water:
+      case TerrainType.ocean:
         return SizedBox(
           width: 20.0,
           height: 20.0,
@@ -342,6 +342,7 @@ class _MapTile extends StatelessWidget {
       case TerrainType.solarSpace:
       case TerrainType.terrestrialSpace:
       case TerrainType.localSpace:
+      case TerrainType.solarSystem:
         return SizedBox(
           width: 20.0,
           height: 20.0,
@@ -363,6 +364,7 @@ class _MapTile extends StatelessWidget {
   Widget get _bLocation {
     switch (tileData.terrain.terrainType) {
       case TerrainType.grassland:
+        return Marty(index: 0, isBackgroundTransparent: true);
       case TerrainType.continent:
       case TerrainType.planet:
       case TerrainType.solarSpace:
@@ -375,7 +377,7 @@ class _MapTile extends StatelessWidget {
       case TerrainType.terrestrialStar:
       case TerrainType.ocean:
       case TerrainType.water:
-        return Marty(index: 0, isBackgroundTransparent: true);
+        return null;
     }
   }
 
@@ -394,13 +396,23 @@ class _MapTile extends StatelessWidget {
       color: color,
       child: Stack(
         children: <Widget>[
-          if (tileData.terrain.terrainType == TerrainType.planet)
+          if (tileData.terrain.terrainType == TerrainType.star)
             Positioned(
               top: 0,
               left: 0,
               child: SizedBox(
                 width: tileData.size.width,
                 height: tileData.size.height,
+                child: StarClose(),
+              ),
+            ),
+          if (tileData.terrain.terrainType == TerrainType.planet)
+            Positioned(
+              top: 10.0 * layerScale,
+              left: 10.0 * layerScale,
+              child: SizedBox(
+                width: tileData.size.width - 10.0 * layerScale,
+                height: tileData.size.height - 10.0 * layerScale,
                 child: Planet(),
               ),
             ),

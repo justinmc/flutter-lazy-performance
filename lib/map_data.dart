@@ -6,16 +6,14 @@ import 'layer.dart';
 
 // TODO Things that are not good to demo:
 // TODOs :)
-// Purple planets.
-// Grass everywhere in space and stuff.
 // Starts in space.
-// Marty in weird places.
 // Only one star per solar system.
 // Rarer water inside of continents.
 
 // Other stuff:
 // UFO.
 // Get rid of a/b locations, do special assets off of tile types.
+// Galactic scale isn't working! Off by one error?
 
 class MapData {
   MapData({
@@ -122,6 +120,12 @@ class TileData {
     }
 
     // Planets are surrounded by space.
+    if ((parent.terrain.terrainType == TerrainType.planet
+      || parent.terrain.terrainType == TerrainType.star) && location.isInCircularEdge()) {
+      return TerrainType.terrestrialSpace;
+    }
+
+    // Stars are surrounded by space.
     if (parent.terrain.terrainType == TerrainType.planet && location.isInCircularEdge()) {
       return TerrainType.terrestrialSpace;
     }

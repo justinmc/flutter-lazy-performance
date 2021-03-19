@@ -3,11 +3,11 @@ import 'package:flutter/widgets.dart';
 
 import 'rive_asset.dart';
 
-class Star extends RiveAsset {
-  const Star({
+class StarClose extends RiveAsset {
+  const StarClose({
     Key key,
   }) : super(
     key: key,
-    asset: 'assets/star.riv',
+    asset: 'assets/star_close.riv',
   );
 }
