@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
+import 'cloud.dart';
 import 'fire.dart';
 import 'layer.dart';
 import 'map_data.dart';
@@ -329,10 +330,11 @@ class _MapTile extends StatelessWidget {
   Widget get _aLocation {
     switch (tileData.terrain.terrainType) {
       case TerrainType.grassland:
-      case TerrainType.continent:
         return _Grass();
-      case TerrainType.water:
+      case TerrainType.continent:
       case TerrainType.ocean:
+        return Cloud();
+      case TerrainType.water:
         return SizedBox(
           width: 20.0,
           height: 20.0,
@@ -348,7 +350,6 @@ class _MapTile extends StatelessWidget {
           height: 20.0,
           child: Star(),
         );
-      case TerrainType.star:
       case TerrainType.terrestrialStar:
       case TerrainType.localStar:
         return SizedBox(
@@ -357,6 +358,7 @@ class _MapTile extends StatelessWidget {
           child: Fire(),
         );
       case TerrainType.planet:
+      case TerrainType.star:
         return null;
     }
   }
@@ -408,11 +410,11 @@ class _MapTile extends StatelessWidget {
             ),
           if (tileData.terrain.terrainType == TerrainType.planet)
             Positioned(
-              top: 10.0 * layerScale,
-              left: 10.0 * layerScale,
+              top: 20.0 * layerScale,
+              left: 20.0 * layerScale,
               child: SizedBox(
-                width: tileData.size.width - 10.0 * layerScale,
-                height: tileData.size.height - 10.0 * layerScale,
+                width: tileData.size.width - 40.0 * layerScale,
+                height: tileData.size.height - 40.0 * layerScale,
                 child: Planet(),
               ),
             ),

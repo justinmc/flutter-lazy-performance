@@ -7,8 +7,6 @@ import 'layer.dart';
 // TODO Things that are not good to demo:
 // TODOs :)
 // Starts in space.
-// Only one star per solar system.
-// Rarer water inside of continents.
 
 // Other stuff:
 // UFO.
@@ -130,8 +128,22 @@ class TileData {
       return TerrainType.terrestrialSpace;
     }
 
+    List<TerrainType> childTerrainTypes = List.from(parent.terrain.childTerrainTypes);
+
+    // Only 1 star in a solar system.
+    if (parent.terrain.terrainType == TerrainType.solarSystem) {
+      if (location.row % 10 == 5 && location.column % 10 == 5) {
+        return TerrainType.star;
+      }
+      if (location.isInCircularEdge()) {
+      return TerrainType.solarSpace;
+      }
+      assert(childTerrainTypes.contains(TerrainType.star));
+      childTerrainTypes.remove(TerrainType.star);
+    }
+
     // Choose a random type that fits the parent.
-    return parent.terrain.childTerrainTypes[random.nextInt(parent.terrain.childTerrainTypes.length)];
+    return childTerrainTypes[random.nextInt(childTerrainTypes.length)];
   }
 
   // Easy way to get a loation by row, column when stored in an iterable by a
@@ -253,6 +265,10 @@ const Map<TerrainType, Terrain> _terrainToType = <TerrainType, Terrain>{
     terrainType: TerrainType.continent,
     layer: LayerType.terrestrial,
     childTerrainTypes: <TerrainType>[
+      TerrainType.grassland,
+      TerrainType.grassland,
+      TerrainType.grassland,
+      TerrainType.grassland,
       TerrainType.grassland,
       TerrainType.water,
     ],
