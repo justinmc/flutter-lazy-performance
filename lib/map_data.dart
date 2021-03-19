@@ -4,6 +4,12 @@ import 'dart:ui' show Offset, Size;
 import 'constants.dart';
 import 'layer.dart';
 
+// TODO Things that are not good to demo:
+// TODOs :)
+// Purple planets.
+// Grass everywhere in space and stuff.
+// Starts in space.
+
 class MapData {
   MapData({
     this.seed,
@@ -48,18 +54,7 @@ class TileData {
     }
 
     final Random random = Random('${location.row},${location.column},$seed'.hashCode);
-
-    final Location solarOrigin = Location(
-      row: 0,
-      column: 0,
-      layerType: LayerType.solar,
-    );
-    final TerrainType terrainType = parent == null
-        ? _galacticTerrainTypes[random.nextInt(_galacticTerrainTypes.length)]
-        // Always start the origin as grassland.
-        : parent.location == solarOrigin
-            ? TerrainType.continent
-            : parent.terrain.childTerrainTypes[random.nextInt(parent.terrain.childTerrainTypes.length)];
+    final TerrainType terrainType = _getTerrainType(parent, location, random);
 
     final List<Location> aLocations = <Location>[
       for(int i = 0; i < random.nextInt(_maxLocations); i++)
@@ -89,6 +84,44 @@ class TileData {
   }
 
   static const int _maxLocations = 3;
+
+  static TerrainType _getTerrainType(TileData parent, Location location, Random random) {
+    if (parent == null) {
+      return _galacticTerrainTypes[random.nextInt(_galacticTerrainTypes.length)];
+    }
+
+    // Always put a planet near the origin.
+    if (location.row == 0 && location.column == 0) {
+      switch (location.layerType) {
+        case LayerType.galactic:
+          return TerrainType.solarSystem;
+        case LayerType.solar:
+          return TerrainType.planet;
+        case LayerType.terrestrial:
+        case LayerType.local:
+          break;
+          /*
+        case LayerType.terrestrial:
+          return TerrainType.continent;
+        case LayerType.local:
+          return TerrainType.grassland;
+          */
+      }
+    }
+
+    // Continents are surrounded by water.
+    if (parent.terrain.terrainType == TerrainType.continent && location.isInCircularEdge()) {
+      return TerrainType.water;
+    }
+
+    // Planets are surrounded by space.
+    if (parent.terrain.terrainType == TerrainType.planet && location.isInCircularEdge()) {
+      return TerrainType.terrestrialSpace;
+    }
+
+    // Choose a random type that fits the parent.
+    return parent.terrain.childTerrainTypes[random.nextInt(parent.terrain.childTerrainTypes.length)];
+  }
 
   // Easy way to get a loation by row, column when stored in an iterable by a
   // 1D index.
@@ -298,6 +331,28 @@ class Location {
       column: (column / Layer.layerScale).floor(),
       layerType: parentLayerType,
     );
+  }
+
+  bool isInCircularEdge() {
+    final int normalRow = row % 10;
+    final int normalColumn = column % 10;
+
+    // Square edge.
+    if (normalRow == 0 || normalRow == 9 || normalColumn == 0 || normalColumn == 9) {
+      return true;
+    }
+
+    // Top cut out.
+    if (normalRow == 1 && (normalColumn == 1 || normalColumn == 8)) {
+      return true;
+    }
+
+    // Bottom cut out.
+    if (normalRow == 8 && (normalColumn == 1 || normalColumn == 8)) {
+      return true;
+    }
+
+    return false;
   }
 
   final int row;

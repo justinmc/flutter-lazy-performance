@@ -330,12 +330,7 @@ class _MapTile extends StatelessWidget {
       case TerrainType.grassland:
       case TerrainType.continent:
       case TerrainType.planet:
-      case TerrainType.solarSpace:
-      case TerrainType.galacticSpace:
-      case TerrainType.terrestrialSpace:
-      case TerrainType.star:
       case TerrainType.solarSystem:
-      case TerrainType.terrestrialStar:
       case TerrainType.ocean:
         return _Grass();
       case TerrainType.water:
@@ -344,12 +339,17 @@ class _MapTile extends StatelessWidget {
           height: 20.0,
           child: Wave(),
         );
+      case TerrainType.galacticSpace:
+      case TerrainType.solarSpace:
+      case TerrainType.terrestrialSpace:
       case TerrainType.localSpace:
         return SizedBox(
           width: 20.0,
           height: 20.0,
           child: Star(),
         );
+      case TerrainType.star:
+      case TerrainType.terrestrialStar:
       case TerrainType.localStar:
         return SizedBox(
           width: 20.0,
