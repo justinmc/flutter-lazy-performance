@@ -61,17 +61,17 @@ class MyHomePage extends StatelessWidget {
           ),
           MyListItem(
             route: '/iv-slow',
-            title: 'InteractiveViewer Slow Example',
+            title: 'Naive InteractiveViewer Example',
             subtitle: "Build everything, even what's not visible.",
           ),
           MyListItem(
             route: '/iv-builder',
-            title: 'InteractiveViewer Builder Grid Example',
+            title: 'InteractiveViewer.builder Example',
             subtitle: 'Build only the visible parts of a grid.',
           ),
           MyListItem(
             route: '/procedural-generation',
-            title: 'InteractiveViewer Procedural Generation Example',
+            title: 'InteractiveViewer.builder Procedural Generation Example',
             subtitle: 'Generate the content to build.',
           ),
           /*

@@ -39,7 +39,7 @@ class _IVSlowPageState extends State<IVSlowPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Two Dimensions - Slow'),
+        title: const Text('Two Dimensions - Naive'),
         actions: <Widget>[
         ],
       ),
