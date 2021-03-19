@@ -225,6 +225,10 @@ const Map<TerrainType, Terrain> _terrainToType = <TerrainType, Terrain>{
       TerrainType.star,
       TerrainType.planet,
       TerrainType.solarSpace,
+      TerrainType.solarSpace,
+      TerrainType.solarSpace,
+      TerrainType.solarSpace,
+      TerrainType.solarSpace,
     ],
   ),
 
