@@ -50,6 +50,8 @@ flutter:
     - assets/grass.riv
     - assets/marty_v6.riv
     - assets/marty_transparent.riv
+    - assets/star.riv
+    - assets/wave.riv
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.

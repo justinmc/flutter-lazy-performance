@@ -7,9 +7,12 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 import 'constants.dart';
+import 'fire.dart';
 import 'layer.dart';
 import 'map_data.dart';
 import 'marty.dart';
+import 'star.dart';
+import 'wave.dart';
 
 class ProceduralGenerationPage extends StatefulWidget {
   const ProceduralGenerationPage({ Key key }) : super(key: key);
@@ -306,14 +309,14 @@ class _MapTile extends StatelessWidget {
       case TerrainType.planet:
         return Colors.purple;
       case TerrainType.solarSpace:
-      case TerrainType.localSpace:
       case TerrainType.galacticSpace:
+      case TerrainType.localSpace:
       case TerrainType.terrestrialSpace:
         return Colors.black;
       case TerrainType.star:
       case TerrainType.solarSystem:
-      case TerrainType.localStar:
       case TerrainType.terrestrialStar:
+      case TerrainType.localStar:
         return Colors.yellow;
       case TerrainType.water:
       case TerrainType.ocean:
@@ -328,16 +331,31 @@ class _MapTile extends StatelessWidget {
       case TerrainType.continent:
       case TerrainType.planet:
       case TerrainType.solarSpace:
-      case TerrainType.localSpace:
       case TerrainType.galacticSpace:
       case TerrainType.terrestrialSpace:
       case TerrainType.star:
       case TerrainType.solarSystem:
-      case TerrainType.localStar:
       case TerrainType.terrestrialStar:
-      case TerrainType.water:
       case TerrainType.ocean:
         return _Grass();
+      case TerrainType.water:
+        return SizedBox(
+          width: 20.0,
+          height: 20.0,
+          child: Wave(),
+        );
+      case TerrainType.localSpace:
+        return SizedBox(
+          width: 20.0,
+          height: 20.0,
+          child: Star(),
+        );
+      case TerrainType.localStar:
+        return SizedBox(
+          width: 20.0,
+          height: 20.0,
+          child: Fire(),
+        );
     }
   }
 
@@ -354,15 +372,16 @@ class _MapTile extends StatelessWidget {
       case TerrainType.solarSystem:
       case TerrainType.localStar:
       case TerrainType.terrestrialStar:
-      case TerrainType.water:
       case TerrainType.ocean:
+      case TerrainType.water:
         return Marty(index: 0, isBackgroundTransparent: true);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    //print('justin build map tile ${tileData.location.layerType} ${tileData.terrain.terrainType} of size ${tileData.size} and color $color');
+    final int layerExponent = layers[tileData.location.layerType].level;
+    final int layerScale = pow(10, layerExponent);
     return Container(
       width: tileData.size.width,
       height: tileData.size.height,
@@ -378,27 +397,35 @@ class _MapTile extends StatelessWidget {
           Positioned(
             top: 0,
             left: 0,
-            child: Text('${tileData.location.row}, ${tileData.location.column}'),
+            child: Text(
+              '${tileData.terrain.terrainType.toString().substring(12)}\n${tileData.location.row}, ${tileData.location.column}',
+              style: TextStyle(
+                color: Colors.grey,
+                fontSize: 10.0 * layerScale,
+              ),
+            ),
           ),
           for (Location location in tileData.aLocations)
             Positioned(
-              left: location.column * cellSize.width / Layer.layerScale,
-              top: location.row * cellSize.height / Layer.layerScale,
-              child: _aLocation,
+              left: location.column * cellSize.width / Layer.layerScale * layerScale,
+              top: location.row * cellSize.height / Layer.layerScale * layerScale,
+              child: SizedBox(
+                width: 20.0 * layerScale,
+                height: 20.0 * layerScale,
+                child: _aLocation,
+              ),
             ),
           for (Location location in tileData.bLocations)
             Positioned(
                 /*
-              left: location.column * cellSize.width / Layer.layerScale,
-              top: location.row * cellSize.height / Layer.layerScale,
+              left: location.column * cellSize.width / Layer.layerScale * layerScale,
+              top: location.row * cellSize.height / Layer.layerScale * layerScale,
               */
-              left: 25,
-              top: 25,
-              // TODO(justinmc): Make this _Grassland widget a generic widget, and
-              // choose child here based on type.
+              left: 25.0 * layerScale,
+              top: 25.0 * layerScale,
               child: SizedBox(
-                width: 50.0,
-                height: 50.0,
+                width: 50.0 * layerScale,
+                height: 50.0 * layerScale,
                 child: _bLocation,
               ),
             ),

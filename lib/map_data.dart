@@ -139,40 +139,19 @@ class TileData {
   }
 }
 
-/*
-abstract class Terrain {
-  const Terrain();
-
-  TerrainType get terrainType;
-  LayerType get layer;
-}
-
-class TerrestrialTerrain extends Terrain {
-  const TerrestrialTerrain();
-
-  final TerrainType terrainType = TerrainType.grassland;
-  final LayerType layer = LayerType.terrestrial;
-}
-
-class GrasslandTerrain extends Terrain {
-  const GrasslandTerrain();
-
-  final TerrainType terrainType = TerrainType.grassland;
-  final LayerType layer = LayerType.local;
-  final List<TerrainType> childTerrainTypes = null;
-}
-*/
 
 class Terrain {
   const Terrain({
     this.layer,
     this.terrainType,
     this.childTerrainTypes,
+    this.limitPerParent,
   });
 
   final TerrainType terrainType;
   final LayerType layer;
   final List<TerrainType> childTerrainTypes;
+  final int limitPerParent;
 
   @override
   String toString() {
@@ -182,24 +161,48 @@ class Terrain {
 
 // TODO(justinmc): This name is reversed...
 const Map<TerrainType, Terrain> _terrainToType = <TerrainType, Terrain>{
-  TerrainType.grassland: Terrain(
-    terrainType: TerrainType.grassland,
-    layer: LayerType.local,
+  TerrainType.solarSystem: Terrain(
+    terrainType: TerrainType.solarSystem,
+    layer: LayerType.galactic,
+    limitPerParent: 30,
+    childTerrainTypes: <TerrainType>[
+      TerrainType.star,
+      TerrainType.planet,
+      TerrainType.solarSpace,
+    ],
   ),
 
-  TerrainType.water: Terrain(
-    terrainType: TerrainType.water,
-    layer: LayerType.local,
+  TerrainType.galacticSpace: Terrain(
+    terrainType: TerrainType.galacticSpace,
+    layer: LayerType.galactic,
+    childTerrainTypes: <TerrainType>[
+      TerrainType.solarSpace,
+    ],
   ),
 
-  TerrainType.localSpace: Terrain(
-    terrainType: TerrainType.localSpace,
-    layer: LayerType.local,
+  TerrainType.solarSpace: Terrain(
+    terrainType: TerrainType.solarSpace,
+    layer: LayerType.solar,
+    childTerrainTypes: <TerrainType>[
+      TerrainType.terrestrialSpace,
+    ],
   ),
 
-  TerrainType.localStar: Terrain(
-    terrainType: TerrainType.localStar,
-    layer: LayerType.local,
+  TerrainType.star: Terrain(
+    terrainType: TerrainType.star,
+    layer: LayerType.solar,
+    childTerrainTypes: <TerrainType>[
+      TerrainType.terrestrialStar,
+    ],
+  ),
+
+  TerrainType.planet: Terrain(
+    terrainType: TerrainType.planet,
+    layer: LayerType.solar,
+    childTerrainTypes: <TerrainType>[
+      TerrainType.ocean,
+      TerrainType.continent,
+    ],
   ),
 
   TerrainType.continent: Terrain(
@@ -235,47 +238,24 @@ const Map<TerrainType, Terrain> _terrainToType = <TerrainType, Terrain>{
     ],
   ),
 
-  TerrainType.star: Terrain(
-    terrainType: TerrainType.star,
-    layer: LayerType.solar,
-    childTerrainTypes: <TerrainType>[
-      TerrainType.terrestrialStar,
-    ],
+  TerrainType.grassland: Terrain(
+    terrainType: TerrainType.grassland,
+    layer: LayerType.local,
   ),
 
-  TerrainType.planet: Terrain(
-    terrainType: TerrainType.planet,
-    layer: LayerType.solar,
-    childTerrainTypes: <TerrainType>[
-      TerrainType.ocean,
-      TerrainType.continent,
-    ],
+  TerrainType.water: Terrain(
+    terrainType: TerrainType.water,
+    layer: LayerType.local,
   ),
 
-  TerrainType.solarSpace: Terrain(
-    terrainType: TerrainType.solarSpace,
-    layer: LayerType.solar,
-    childTerrainTypes: <TerrainType>[
-      TerrainType.terrestrialSpace,
-    ],
+  TerrainType.localSpace: Terrain(
+    terrainType: TerrainType.localSpace,
+    layer: LayerType.local,
   ),
 
-  TerrainType.solarSystem: Terrain(
-    terrainType: TerrainType.solarSystem,
-    layer: LayerType.galactic,
-    childTerrainTypes: <TerrainType>[
-      TerrainType.star,
-      TerrainType.planet,
-      TerrainType.solarSpace,
-    ],
-  ),
-
-  TerrainType.galacticSpace: Terrain(
-    terrainType: TerrainType.galacticSpace,
-    layer: LayerType.galactic,
-    childTerrainTypes: <TerrainType>[
-      TerrainType.solarSpace,
-    ],
+  TerrainType.localStar: Terrain(
+    terrainType: TerrainType.localStar,
+    layer: LayerType.local,
   ),
 };
 
