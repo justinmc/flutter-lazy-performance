@@ -9,6 +9,13 @@ import 'layer.dart';
 // Purple planets.
 // Grass everywhere in space and stuff.
 // Starts in space.
+// Marty in weird places.
+// Only one star per solar system.
+// Rarer water inside of continents.
+
+// Other stuff:
+// UFO.
+// Get rid of a/b locations, do special assets off of tile types.
 
 class MapData {
   MapData({
@@ -57,7 +64,7 @@ class TileData {
     final TerrainType terrainType = _getTerrainType(parent, location, random);
 
     final List<Location> aLocations = <Location>[
-      for(int i = 0; i < random.nextInt(_maxLocations); i++)
+      for (int i = 0; i < random.nextInt(_maxLocations); i++)
          Location(
            row: 1 + random.nextInt(Layer.layerScale - 2),
            column: 1 + random.nextInt(Layer.layerScale - 2),

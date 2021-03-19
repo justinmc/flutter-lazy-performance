@@ -11,6 +11,7 @@ import 'fire.dart';
 import 'layer.dart';
 import 'map_data.dart';
 import 'marty.dart';
+import 'planet.dart';
 import 'star.dart';
 import 'wave.dart';
 
@@ -307,7 +308,6 @@ class _MapTile extends StatelessWidget {
       case TerrainType.continent:
         return Colors.lightGreenAccent;
       case TerrainType.planet:
-        return Colors.purple;
       case TerrainType.solarSpace:
       case TerrainType.galacticSpace:
       case TerrainType.localSpace:
@@ -329,7 +329,6 @@ class _MapTile extends StatelessWidget {
     switch (tileData.terrain.terrainType) {
       case TerrainType.grassland:
       case TerrainType.continent:
-      case TerrainType.planet:
       case TerrainType.solarSystem:
       case TerrainType.ocean:
         return _Grass();
@@ -356,6 +355,8 @@ class _MapTile extends StatelessWidget {
           height: 20.0,
           child: Fire(),
         );
+      case TerrainType.planet:
+        return null;
     }
   }
 
@@ -393,7 +394,16 @@ class _MapTile extends StatelessWidget {
       color: color,
       child: Stack(
         children: <Widget>[
-          // TODO(justinmc): This is for debug, remove.
+          if (tileData.terrain.terrainType == TerrainType.planet)
+            Positioned(
+              top: 0,
+              left: 0,
+              child: SizedBox(
+                width: tileData.size.width,
+                height: tileData.size.height,
+                child: Planet(),
+              ),
+            ),
           Positioned(
             top: 0,
             left: 0,
@@ -406,29 +416,31 @@ class _MapTile extends StatelessWidget {
             ),
           ),
           for (Location location in tileData.aLocations)
-            Positioned(
-              left: location.column * cellSize.width / Layer.layerScale * layerScale,
-              top: location.row * cellSize.height / Layer.layerScale * layerScale,
-              child: SizedBox(
-                width: 20.0 * layerScale,
-                height: 20.0 * layerScale,
-                child: _aLocation,
+            if (location != null)
+              Positioned(
+                left: location.column * cellSize.width / Layer.layerScale * layerScale,
+                top: location.row * cellSize.height / Layer.layerScale * layerScale,
+                child: SizedBox(
+                  width: 20.0 * layerScale,
+                  height: 20.0 * layerScale,
+                  child: _aLocation,
+                ),
               ),
-            ),
           for (Location location in tileData.bLocations)
-            Positioned(
-                /*
-              left: location.column * cellSize.width / Layer.layerScale * layerScale,
-              top: location.row * cellSize.height / Layer.layerScale * layerScale,
-              */
-              left: 25.0 * layerScale,
-              top: 25.0 * layerScale,
-              child: SizedBox(
-                width: 50.0 * layerScale,
-                height: 50.0 * layerScale,
-                child: _bLocation,
+            if (location != null)
+              Positioned(
+                  /*
+                left: location.column * cellSize.width / Layer.layerScale * layerScale,
+                top: location.row * cellSize.height / Layer.layerScale * layerScale,
+                */
+                left: 25.0 * layerScale,
+                top: 25.0 * layerScale,
+                child: SizedBox(
+                  width: 50.0 * layerScale,
+                  height: 50.0 * layerScale,
+                  child: _bLocation,
+                ),
               ),
-            ),
         ],
       ),
     );
