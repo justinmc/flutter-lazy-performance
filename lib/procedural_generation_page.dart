@@ -29,7 +29,7 @@ class ProceduralGenerationPage extends StatefulWidget {
 class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
   final TransformationController _transformationController = TransformationController();
 
-  static const double _minScale = 0.001; // TODO could do even more.
+  static const double _minScale = 0.006;
   static const double _maxScale = 10.5;
 
   void _onChangeTransformation() {
