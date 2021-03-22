@@ -141,7 +141,6 @@ class _MapGrid extends StatelessWidget {
     final Size size = layers[parentLayerType].size;
     //print('justin I think the big tiles should be at layer $parentLayerType and center is ${center.location} at ${viewport.center}, size $size');
 
-    // TODO Can I use keys to avoid rebuilding _ParentMapTiles here?
     return Container(
       width: size.width * 3,
       height: size.height * 3,
@@ -198,7 +197,7 @@ class _ParentMapTile extends StatelessWidget {
     @required this.viewport
   }) : assert(tileData != null),
        assert(viewport != null),
-       super(key: key);
+       super(key: key ?? ValueKey(tileData));
 
   final TileData tileData;
   final Rect viewport;
@@ -295,7 +294,6 @@ class _MapTile extends StatelessWidget {
     }
   }
 
-  // TODO More a/bLocations
   Widget get _aLocation {
     switch (tileData.terrain.terrainType) {
       case TerrainType.grassland:

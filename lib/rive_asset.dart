@@ -26,6 +26,7 @@ class _RiveAssetState extends State<RiveAsset> {
   void initState() {
     super.initState();
 
+    // This will naively reload the asset for every instance of this widget.
     rootBundle.load(widget.asset).then(
       (data) async {
         if (_disposed) {
