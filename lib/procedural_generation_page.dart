@@ -90,7 +90,6 @@ class _MapGrid extends StatefulWidget{
 }
 
 class _MapGridState extends State<_MapGrid> {
-  // TODO(justinmc): UI for choosing a seed.
   final MapData _mapData = MapData(seed: 80);
   Set<TileData> _visibleTileDatas = Set<TileData>();
 
@@ -100,7 +99,6 @@ class _MapGridState extends State<_MapGrid> {
   int _lastVisibleColumn;
   int _lastVisibleRow;
   bool _isCellVisible(int row, int column, final LayerType layerType) {
-    // TODO Deduplicate with other _isCellVisible.
     if (widget.viewport != _cachedViewport) {
       _cachedViewport = widget.viewport;
       int layerExponent = 0;
@@ -116,11 +114,6 @@ class _MapGridState extends State<_MapGrid> {
       _lastVisibleColumn = (widget.viewport.right / (cellSize.width * layerScale)).floor();
     }
 
-    /*
-    final bool visible = row >= _firstVisibleRow && row <= _lastVisibleRow
-        && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
-    print('justin is $row, $column visible? $visible b/c firsts $_firstVisibleRow - $_lastVisibleRow, $_firstVisibleColumn - $_lastVisibleColumn for $viewport');
-    */
     return row >= _firstVisibleRow && row <= _lastVisibleRow
         && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
   }
@@ -183,7 +176,6 @@ class _MapGridState extends State<_MapGrid> {
                   Row(
                     children: <Widget>[
                       for (int column = center.location.column - 1; column <= center.location.column + 1; column++)
-                        // TODO(justinmc): Dynamically get layer type.
                         _isCellVisible(row, column, parentLayerType)
                           ? _ParentMapTile(
                             viewport: widget.viewport,
@@ -196,12 +188,6 @@ class _MapGridState extends State<_MapGrid> {
                           : Container(
                               width: size.width,
                               height: size.height,
-                              color: Colors.green.withOpacity(0.3),
-                              /*
-                              decoration: BoxDecoration(
-                                border: Border.all(color: Colors.black)
-                              ),
-                              */
                             ),
                     ],
                   ),
@@ -252,10 +238,8 @@ class _ParentMapTile extends StatelessWidget {
   }
 
   bool _isCellVisible(int row, int column) {
-    //    && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
     final bool visible = row >= _firstVisibleRow && row <= _lastVisibleRow
         && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
-    //print('justin $row, $column is visible? $visible');
     return visible;
   }
 

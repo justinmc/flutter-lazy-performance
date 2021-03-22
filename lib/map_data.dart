@@ -4,13 +4,6 @@ import 'dart:ui' show Offset, Size;
 import 'constants.dart';
 import 'layer.dart';
 
-// TODO Things that are not good to demo:
-// TODOs :)
-
-// Other stuff:
-// Starts in space.
-// Get rid of a/b locations, do special assets off of tile types.
-
 class MapData {
   MapData({
     this.seed,
@@ -79,7 +72,7 @@ class TileData {
       aLocations: aLocations,
       bLocations: bLocations,
       seed: seed,
-      terrain: _terrainToType[terrainType],
+      terrain: _typeToTerrain[terrainType],
       parent: parent,
     );
   }
@@ -148,7 +141,6 @@ class TileData {
   // 1D index.
   //
   // row and column are local to the parent, not global location.
-  // TODO pass Location instead of row and column?
   static TileData getByRowColumn(Iterable<TileData> tileDatas, int row, int column) {
     final int index = row * Layer.layerScale + column;
     assert(index >= 0 && index < tileDatas.length, 'Invalid index $index for tileDatas of length ${tileDatas.length}.');
@@ -213,8 +205,7 @@ class Terrain {
   }
 }
 
-// TODO(justinmc): This name is reversed...
-const Map<TerrainType, Terrain> _terrainToType = <TerrainType, Terrain>{
+const Map<TerrainType, Terrain> _typeToTerrain = <TerrainType, Terrain>{
   TerrainType.solarSystem: Terrain(
     terrainType: TerrainType.solarSystem,
     layer: LayerType.galactic,

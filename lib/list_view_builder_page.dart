@@ -12,7 +12,7 @@ class ListViewBuilderPage extends StatefulWidget {
 }
 
 class _ListViewBuilderPageState extends State<ListViewBuilderPage> {
-  static const _itemCount = 10;
+  static const _itemCount = 100;
 
   @override
   Widget build(BuildContext context) {

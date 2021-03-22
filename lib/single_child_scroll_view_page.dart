@@ -12,7 +12,7 @@ class SingleChildScrollViewPage extends StatefulWidget {
 }
 
 class _SingleChildScrollViewPageState extends State<SingleChildScrollViewPage> {
-  static const _itemCount = 100;
+  static const _itemCount = 10;
 
   @override
   Widget build(BuildContext context) {
