@@ -9,9 +9,7 @@ import 'layer.dart';
 
 // Other stuff:
 // Starts in space.
-// UFO.
 // Get rid of a/b locations, do special assets off of tile types.
-// Galactic scale isn't working! Off by one error?
 
 class MapData {
   MapData({

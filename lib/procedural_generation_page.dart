@@ -1,14 +1,13 @@
 import 'dart:math' show pow, max;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
-import 'package:rive/rive.dart';
 import 'package:vector_math/vector_math_64.dart' show Quad;
 
 import 'constants.dart';
 import 'cloud.dart';
 import 'fire.dart';
+import 'grass.dart';
 import 'helpers.dart';
 import 'layer.dart';
 import 'map_data.dart';
@@ -78,15 +77,22 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
   }
 }
 
-class _MapGrid extends StatelessWidget {
+class _MapGrid extends StatefulWidget{
   _MapGrid({
     Key key,
     this.viewport,
   }) : super(key: key);
 
+  final Rect viewport;
+
+  @override
+  _MapGridState createState() => _MapGridState();
+}
+
+class _MapGridState extends State<_MapGrid> {
   // TODO(justinmc): UI for choosing a seed.
   final MapData _mapData = MapData(seed: 80);
-  final Rect viewport;
+  Set<TileData> _visibleTileDatas = Set<TileData>();
 
   Rect _cachedViewport;
   int _firstVisibleColumn;
@@ -95,9 +101,8 @@ class _MapGrid extends StatelessWidget {
   int _lastVisibleRow;
   bool _isCellVisible(int row, int column, final LayerType layerType) {
     // TODO Deduplicate with other _isCellVisible.
-    // TODO(justinmc): Make sure this works when tileData.location.layerType is local.
-    if (viewport != _cachedViewport) {
-      _cachedViewport = viewport;
+    if (widget.viewport != _cachedViewport) {
+      _cachedViewport = widget.viewport;
       int layerExponent = 0;
       LayerType currentLayerType = layers[layerType].child;
       while (currentLayerType != null) {
@@ -105,10 +110,10 @@ class _MapGrid extends StatelessWidget {
         currentLayerType = layers[currentLayerType].child;
       }
       final int layerScale = pow(10, layerExponent);
-      _firstVisibleRow = (viewport.top / (cellSize.height * layerScale)).floor();
-      _firstVisibleColumn = (viewport.left / (cellSize.width * layerScale)).floor();
-      _lastVisibleRow = (viewport.bottom / (cellSize.height * layerScale)).floor();
-      _lastVisibleColumn = (viewport.right / (cellSize.width * layerScale)).floor();
+      _firstVisibleRow = (widget.viewport.top / (cellSize.height * layerScale)).floor();
+      _firstVisibleColumn = (widget.viewport.left / (cellSize.width * layerScale)).floor();
+      _lastVisibleRow = (widget.viewport.bottom / (cellSize.height * layerScale)).floor();
+      _lastVisibleColumn = (widget.viewport.right / (cellSize.width * layerScale)).floor();
     }
 
     /*
@@ -120,26 +125,47 @@ class _MapGrid extends StatelessWidget {
         && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
   }
 
+  void _updateVisibleTileDatas(LayerType parentLayerType, TileData center) {
+    Set<TileData> nextVisibleTileDatas = Set<TileData>();
+    for (int row = center.location.row - 1; row <= center.location.row + 1; row++) {
+      for (int column = center.location.column - 1; column <= center.location.column + 1; column++) {
+        final TileData tileData = _mapData.getTileDataAt(Location(
+          row: row,
+          column: column,
+          layerType: parentLayerType,
+        ));
+        if (_visibleTileDatas.contains(tileData)) {
+          nextVisibleTileDatas.add(_visibleTileDatas.lookup(tileData));
+        } else {
+          nextVisibleTileDatas.add(tileData);
+        }
+      }
+    }
+    _visibleTileDatas = nextVisibleTileDatas;
+  }
+
   @override
   Widget build(BuildContext context) {
+    //LayerType parentLayerType = _visibleTileDatas.first.location.layerType;
     LayerType parentLayerType;
-    if (max(viewport.width, viewport.height) < 100) {
+    if (max(widget.viewport.width, widget.viewport.height) < 100) {
       parentLayerType = LayerType.local;
-    } else if (max(viewport.width, viewport.height) < 1000) {
+    } else if (max(widget.viewport.width, widget.viewport.height) < 1000) {
       parentLayerType = LayerType.terrestrial;
-    } else if (max(viewport.width, viewport.height) < 10000) {
+    } else if (max(widget.viewport.width, widget.viewport.height) < 10000) {
       parentLayerType = LayerType.solar;
     } else {
       parentLayerType = LayerType.galactic;
     }
-    TileData center = _mapData.getLowestTileDataAtScreenOffset(viewport.center);
+
+    TileData center = _mapData.getLowestTileDataAtScreenOffset(widget.viewport.center);
     while (center.location.layerType != parentLayerType) {
       assert(center.location.layerType != null);
       center = center.parent;
     }
+    _updateVisibleTileDatas(parentLayerType, center);
 
     final Size size = layers[parentLayerType].size;
-    //print('justin I think the big tiles should be at layer $parentLayerType and center is ${center.location} at ${viewport.center}, size $size');
 
     return Container(
       width: size.width * 3,
@@ -160,12 +186,12 @@ class _MapGrid extends StatelessWidget {
                         // TODO(justinmc): Dynamically get layer type.
                         _isCellVisible(row, column, parentLayerType)
                           ? _ParentMapTile(
-                            viewport: viewport,
-                            tileData: _mapData.getTileDataAt(Location(
+                            viewport: widget.viewport,
+                            tileData: _visibleTileDatas.lookup(_mapData.getTileDataAt(Location(
                               row: row,
                               column: column,
                               layerType: parentLayerType,
-                            )),
+                            ))),
                           )
                           : Container(
                               width: size.width,
@@ -197,12 +223,11 @@ class _ParentMapTile extends StatelessWidget {
     @required this.viewport
   }) : assert(tileData != null),
        assert(viewport != null),
-       super(key: key ?? ValueKey(tileData));
+       super(key: key ?? GlobalObjectKey(tileData));
 
   final TileData tileData;
   final Rect viewport;
 
-  // TODO These variables aren't ok in a stateless widget.
   // The visibility of child tiles.
   int _firstRow;
   int _firstColumn;
@@ -262,7 +287,6 @@ class _ParentMapTile extends StatelessWidget {
   }
 }
 
-
 class _MapTile extends StatelessWidget {
   _MapTile({
     Key key,
@@ -297,7 +321,7 @@ class _MapTile extends StatelessWidget {
   Widget get _aLocation {
     switch (tileData.terrain.terrainType) {
       case TerrainType.grassland:
-        return _Grass();
+        return Grass();
       case TerrainType.continent:
       case TerrainType.ocean:
         return Cloud();
@@ -430,57 +454,5 @@ class _MapTile extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class _Grass extends StatefulWidget {
-  const _Grass({
-    Key key,
-  }) : super(key: key);
-
-  @override _GrassState createState() => _GrassState();
-}
-
-class _GrassState extends State<_Grass> {
-  Artboard _riveArtboard;
-  RiveAnimationController _controller;
-
-  @override
-  void initState() {
-    super.initState();
-
-    // Load the animation file from the bundle, note that you could also
-    // download this. The RiveFile just expects a list of bytes.
-    rootBundle.load('assets/grass.riv').then(
-      (data) async {
-        final file = RiveFile();
-
-        // Load the RiveFile from the binary data.
-        if (file.import(data)) {
-          // The artboard is the root of the animation and gets drawn in the
-          // Rive widget.
-          final artboard = file.mainArtboard;
-          // Add a controller to play back a known animation on the main/default
-          // artboard.We store a reference to it so we can toggle playback.
-          _controller = SimpleAnimation('sway');
-          artboard.addController(_controller);
-          setState(() {
-            _riveArtboard = artboard;
-            _controller.isActive = true;
-          });
-        }
-      },
-    );
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _riveArtboard == null
-      ? const SizedBox()
-      : SizedBox(
-          width: 20.0,
-          height: 20.0,
-          child: Rive(artboard: _riveArtboard),
-        );
   }
 }
