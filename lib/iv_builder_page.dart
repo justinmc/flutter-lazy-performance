@@ -63,6 +63,14 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
       appBar: AppBar(
         title: const Text('Two Dimensions'),
         actions: <Widget>[
+          IconButton(
+            icon: const Icon(Icons.add_alert),
+            tooltip: 'Show Snackbar',
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('This is a snackbar')));
+            },
+          ),
         ],
       ),
       body: Center(
