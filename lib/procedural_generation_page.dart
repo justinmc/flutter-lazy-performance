@@ -16,6 +16,7 @@ import 'marty.dart';
 import 'planet.dart';
 import 'star.dart';
 import 'star_close.dart';
+import 'ufo.dart';
 import 'wave.dart';
 
 class ProceduralGenerationPage extends StatefulWidget {
@@ -335,10 +336,15 @@ class _MapTile extends StatelessWidget {
     switch (tileData.terrain.terrainType) {
       case TerrainType.grassland:
         return Marty(index: 0, isBackgroundTransparent: true);
+      case TerrainType.localSpace:
+        return SizedBox(
+          width: 20.0,
+          height: 20.0,
+          child: UFO(),
+        );
       case TerrainType.continent:
       case TerrainType.planet:
       case TerrainType.solarSpace:
-      case TerrainType.localSpace:
       case TerrainType.galacticSpace:
       case TerrainType.terrestrialSpace:
       case TerrainType.star:

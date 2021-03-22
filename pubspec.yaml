@@ -55,6 +55,7 @@ flutter:
     - assets/planet.riv
     - assets/star.riv
     - assets/star_close.riv
+    - assets/ufo.riv
     - assets/wave.riv
 
   # An image asset can refer to one or more resolution-specific "variants", see

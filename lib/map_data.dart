@@ -6,9 +6,9 @@ import 'layer.dart';
 
 // TODO Things that are not good to demo:
 // TODOs :)
-// Starts in space.
 
 // Other stuff:
+// Starts in space.
 // UFO.
 // Get rid of a/b locations, do special assets off of tile types.
 // Galactic scale isn't working! Off by one error?
