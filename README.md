@@ -4,7 +4,7 @@ Examples of widgets extending off-screen and various ways of handling this.  Dem
 
 Check out the live demo at: [https://justinmc.github.io/flutter-lazy-performance/](https://justinmc.github.io/flutter-lazy-performance/).
 
-Thanks to the Marty McFly asset from Rive: [https://rive.app/community/17-marty_v6/](https://rive.app/community/17-marty_v6/).
+Thanks to the Marty McFly asset from Rive: [https://rive.app/community/52-69-marty-animation/](https://rive.app/community/52-69-marty-animation/).
 
 ![Screenshot of menu](https://raw.githubusercontent.com/justinmc/flutter-lazy-performance/main/screenshots/menu.png?raw=true)
 ![Screenshot of list](https://raw.githubusercontent.com/justinmc/flutter-lazy-performance/main/screenshots/1d.png?raw=true)
