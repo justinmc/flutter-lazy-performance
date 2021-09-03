@@ -6,20 +6,21 @@ import 'package:flutter/widgets.dart';
 
 class RiveAsset extends StatefulWidget {
   const RiveAsset({
-    Key key,
-    @required this.asset,
+    Key? key,
+    required this.asset,
     this.animationIndex = 0,
   }) : super(key: key);
 
   final String asset; // The path to the .riv file.
   final int animationIndex;
 
-  @override _RiveAssetState createState() => _RiveAssetState();
+  @override
+  _RiveAssetState createState() => _RiveAssetState();
 }
 
 class _RiveAssetState extends State<RiveAsset> {
-  Artboard _riveArtboard;
-  RiveAnimationController _controller;
+  Artboard? _riveArtboard;
+  RiveAnimationController? _controller;
   bool _disposed = false;
 
   @override
@@ -32,17 +33,16 @@ class _RiveAssetState extends State<RiveAsset> {
         if (_disposed) {
           return;
         }
-        final file = RiveFile();
+        final file = RiveFile.import(data);
 
-        if (file.import(data)) {
-          final artboard = file.mainArtboard;
-          _controller = SimpleAnimation(artboard.animations[widget.animationIndex].name);
-          artboard.addController(_controller);
-          setState(() {
-            _riveArtboard = artboard;
-            _controller.isActive = true;
-          });
-        }
+        final artboard = file.mainArtboard;
+        _controller =
+            SimpleAnimation(artboard.animations[widget.animationIndex].name);
+        artboard.addController(_controller!);
+        setState(() {
+          _riveArtboard = artboard;
+          _controller?.isActive = true;
+        });
       },
     );
   }
@@ -56,7 +56,7 @@ class _RiveAssetState extends State<RiveAsset> {
   @override
   Widget build(BuildContext context) {
     return _riveArtboard == null
-      ? const SizedBox()
-      : Rive(artboard: _riveArtboard);
+        ? const SizedBox()
+        : Rive(artboard: _riveArtboard!);
   }
 }

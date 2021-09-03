@@ -6,15 +6,17 @@ import 'helpers.dart';
 import 'marty.dart';
 
 class IVBuilderPage extends StatefulWidget {
-  const IVBuilderPage({ Key key }) : super(key: key);
+  const IVBuilderPage({Key? key}) : super(key: key);
 
   static const String routeName = '/iv-builder';
 
-  @override _IVBuilderPageState createState() => _IVBuilderPageState();
+  @override
+  _IVBuilderPageState createState() => _IVBuilderPageState();
 }
 
 class _IVBuilderPageState extends State<IVBuilderPage> {
-  final TransformationController _transformationController = TransformationController();
+  final TransformationController _transformationController =
+      TransformationController();
 
   static const double _cellWidth = 200.0;
   static const double _cellHeight = 200.0;
@@ -23,11 +25,11 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
 
   // Returns true iff the given cell is currently visible. Caches viewport
   // calculations.
-  Quad _cachedViewport;
-  int _firstVisibleColumn;
-  int _firstVisibleRow;
-  int _lastVisibleColumn;
-  int _lastVisibleRow;
+  Quad? _cachedViewport;
+  late int _firstVisibleColumn;
+  late int _firstVisibleRow;
+  late int _lastVisibleColumn;
+  late int _lastVisibleRow;
   bool _isCellVisible(int row, int column, Quad viewport) {
     if (viewport != _cachedViewport) {
       final Rect aabb = axisAlignedBoundingBox(viewport);
@@ -37,8 +39,10 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
       _lastVisibleRow = (aabb.bottom / _cellHeight).floor();
       _lastVisibleColumn = (aabb.right / _cellWidth).floor();
     }
-    return row >= _firstVisibleRow && row <= _lastVisibleRow
-        && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
+    return row >= _firstVisibleRow &&
+        row <= _lastVisibleRow &&
+        column >= _firstVisibleColumn &&
+        column <= _lastVisibleColumn;
   }
 
   void _onChangeTransformation() {
@@ -87,12 +91,14 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
                         children: <Widget>[
                           for (int column = 0; column < _columnCount; column++)
                             _isCellVisible(row, column, viewport)
-                              ? Container(
-                                height: _cellHeight,
-                                width: _cellWidth,
-                                child: Marty(index: row * _columnCount + column),
-                              )
-                              : Container(width: _cellWidth, height: _cellHeight),
+                                ? Container(
+                                    height: _cellHeight,
+                                    width: _cellWidth,
+                                    child: Marty(
+                                        index: row * _columnCount + column),
+                                  )
+                                : Container(
+                                    width: _cellWidth, height: _cellHeight),
                         ],
                       ),
                   ],

@@ -27,19 +27,23 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: <String, Widget Function(BuildContext)>{
         '/': (BuildContext context) => MyHomePage(),
-        SingleChildScrollViewPage.routeName: (BuildContext context) => SingleChildScrollViewPage(),
-        ListViewBuilderPage.routeName: (BuildContext context) => ListViewBuilderPage(),
+        SingleChildScrollViewPage.routeName: (BuildContext context) =>
+            SingleChildScrollViewPage(),
+        ListViewBuilderPage.routeName: (BuildContext context) =>
+            ListViewBuilderPage(),
         IVSlowPage.routeName: (BuildContext context) => IVSlowPage(),
         IVBuilderPage.routeName: (BuildContext context) => IVBuilderPage(),
-        IVBuilderTablePage.routeName: (BuildContext context) => IVBuilderTablePage(),
-        ProceduralGenerationPage.routeName: (BuildContext context) => ProceduralGenerationPage(),
+        IVBuilderTablePage.routeName: (BuildContext context) =>
+            IVBuilderTablePage(),
+        ProceduralGenerationPage.routeName: (BuildContext context) =>
+            ProceduralGenerationPage(),
       },
     );
   }
 }
 
 class MyHomePage extends StatelessWidget {
-  MyHomePage({Key key}) : super(key: key);
+  MyHomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -89,10 +93,10 @@ class MyHomePage extends StatelessWidget {
 
 class MyListItem extends StatelessWidget {
   MyListItem({
-    Key key,
-    @required this.route,
-    @required this.subtitle,
-    @required this.title,
+    Key? key,
+    required this.route,
+    required this.subtitle,
+    required this.title,
   }) : super(key: key);
 
   final String route;

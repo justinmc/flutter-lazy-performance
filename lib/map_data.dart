@@ -6,8 +6,8 @@ import 'layer.dart';
 
 class MapData {
   MapData({
-    this.seed,
-  }) : assert(seed != null);
+    required this.seed,
+  });
 
   final int seed;
 
@@ -16,30 +16,35 @@ class MapData {
   }
 
   TileData getLowestTileDataAtScreenOffset(Offset offset) {
-    return TileData.generate(Location(
-      row: (offset.dy / cellSize.height).floor(),
-      column: (offset.dx / cellSize.width).floor(),
-      layerType: LayerType.local,
-    ), seed);
+    return TileData.generate(
+        Location(
+          row: (offset.dy / cellSize.height).floor(),
+          column: (offset.dx / cellSize.width).floor(),
+          layerType: LayerType.local,
+        ),
+        seed);
   }
 }
 
 class TileData {
   TileData({
-    this.location,
-    this.aLocations,
-    this.bLocations,
+    required this.location,
+    required this.aLocations,
+    required this.bLocations,
     this.parent,
-    this.seed,
-    this.terrain,
-  }) : assert(location != null),
-       assert(aLocations != null),
-       assert(bLocations != null),
-       assert(seed != null),
-       assert(terrain != null);
+    required this.seed,
+    required this.terrain,
+  });
+
+  final Location location;
+  final Iterable<Location> aLocations;
+  final Iterable<Location> bLocations;
+  final TileData? parent;
+  final int seed;
+  final Terrain terrain;
 
   factory TileData.generate(Location location, int seed) {
-    TileData parent;
+    TileData? parent;
     if (location.layerType != LayerType.galactic) {
       parent = TileData.generate(
         location.parent,
@@ -47,16 +52,17 @@ class TileData {
       );
     }
 
-    final Random random = Random('${location.row},${location.column},$seed'.hashCode);
+    final Random random =
+        Random('${location.row},${location.column},$seed'.hashCode);
     final TerrainType terrainType = _getTerrainType(parent, location, random);
 
     final List<Location> aLocations = <Location>[
       for (int i = 0; i < random.nextInt(_maxLocations); i++)
-         Location(
-           row: 1 + random.nextInt(Layer.layerScale - 2),
-           column: 1 + random.nextInt(Layer.layerScale - 2),
-           layerType: location.layerType,
-         ),
+        Location(
+          row: 1 + random.nextInt(Layer.layerScale - 2),
+          column: 1 + random.nextInt(Layer.layerScale - 2),
+          layerType: location.layerType,
+        ),
     ];
     final List<Location> bLocations = <Location>[
       if (random.nextInt(1000) > 988)
@@ -72,16 +78,18 @@ class TileData {
       aLocations: aLocations,
       bLocations: bLocations,
       seed: seed,
-      terrain: _typeToTerrain[terrainType],
+      terrain: _typeToTerrain[terrainType]!,
       parent: parent,
     );
   }
 
   static const int _maxLocations = 3;
 
-  static TerrainType _getTerrainType(TileData parent, Location location, Random random) {
+  static TerrainType _getTerrainType(
+      TileData? parent, Location location, Random random) {
     if (parent == null) {
-      return _galacticTerrainTypes[random.nextInt(_galacticTerrainTypes.length)];
+      return _galacticTerrainTypes[
+          random.nextInt(_galacticTerrainTypes.length)];
     }
 
     // Always put a planet near the origin.
@@ -94,7 +102,7 @@ class TileData {
         case LayerType.terrestrial:
         case LayerType.local:
           break;
-          /*
+        /*
         case LayerType.terrestrial:
           return TerrainType.continent;
         case LayerType.local:
@@ -104,22 +112,26 @@ class TileData {
     }
 
     // Continents are surrounded by water.
-    if (parent.terrain.terrainType == TerrainType.continent && location.isInCircularEdge()) {
+    if (parent.terrain.terrainType == TerrainType.continent &&
+        location.isInCircularEdge()) {
       return TerrainType.water;
     }
 
     // Planets are surrounded by space.
-    if ((parent.terrain.terrainType == TerrainType.planet
-      || parent.terrain.terrainType == TerrainType.star) && location.isInCircularEdge()) {
+    if ((parent.terrain.terrainType == TerrainType.planet ||
+            parent.terrain.terrainType == TerrainType.star) &&
+        location.isInCircularEdge()) {
       return TerrainType.terrestrialSpace;
     }
 
     // Stars are surrounded by space.
-    if (parent.terrain.terrainType == TerrainType.planet && location.isInCircularEdge()) {
+    if (parent.terrain.terrainType == TerrainType.planet &&
+        location.isInCircularEdge()) {
       return TerrainType.terrestrialSpace;
     }
 
-    List<TerrainType> childTerrainTypes = List.from(parent.terrain.childTerrainTypes);
+    List<TerrainType> childTerrainTypes =
+        List.from(parent.terrain.childTerrainTypes ?? []);
 
     // Only 1 star in a solar system.
     if (parent.terrain.terrainType == TerrainType.solarSystem) {
@@ -127,7 +139,7 @@ class TileData {
         return TerrainType.star;
       }
       if (location.isInCircularEdge()) {
-      return TerrainType.solarSpace;
+        return TerrainType.solarSpace;
       }
       assert(childTerrainTypes.contains(TerrainType.star));
       childTerrainTypes.remove(TerrainType.star);
@@ -141,31 +153,27 @@ class TileData {
   // 1D index.
   //
   // row and column are local to the parent, not global location.
-  static TileData getByRowColumn(Iterable<TileData> tileDatas, int row, int column) {
+  static TileData getByRowColumn(
+      Iterable<TileData> tileDatas, int row, int column) {
     final int index = row * Layer.layerScale + column;
-    assert(index >= 0 && index < tileDatas.length, 'Invalid index $index for tileDatas of length ${tileDatas.length}.');
+    assert(index >= 0 && index < tileDatas.length,
+        'Invalid index $index for tileDatas of length ${tileDatas.length}.');
     return tileDatas.elementAt(index);
   }
 
-  final Location location;
-  final Iterable<Location> aLocations;
-  final Iterable<Location> bLocations;
-  final TileData parent;
-  final int seed;
-  final Terrain terrain;
-
-  Iterable<TileData> _children;
+  Iterable<TileData>? _children;
   Iterable<TileData> get children {
     if (_children != null) {
-      return _children;
+      return _children!;
     }
-    _children = Iterable.generate(Layer.layerScale * Layer.layerScale, (int index) {
+    _children =
+        Iterable.generate(Layer.layerScale * Layer.layerScale, (int index) {
       return TileData.generate(location.children.elementAt(index), seed);
     });
-    return _children;
+    return _children!;
   }
 
-  Size get size => layers[location.layerType].size;
+  Size get size => layers[location.layerType]?.size ?? Size.zero;
 
   @override
   String toString() {
@@ -185,19 +193,18 @@ class TileData {
   }
 }
 
-
 class Terrain {
   const Terrain({
-    this.layer,
-    this.terrainType,
+    required this.layer,
+    required this.terrainType,
     this.childTerrainTypes,
     this.limitPerParent,
   });
 
   final TerrainType terrainType;
   final LayerType layer;
-  final List<TerrainType> childTerrainTypes;
-  final int limitPerParent;
+  final List<TerrainType>? childTerrainTypes;
+  final int? limitPerParent;
 
   @override
   String toString() {
@@ -220,7 +227,6 @@ const Map<TerrainType, Terrain> _typeToTerrain = <TerrainType, Terrain>{
       TerrainType.solarSpace,
     ],
   ),
-
   TerrainType.galacticSpace: Terrain(
     terrainType: TerrainType.galacticSpace,
     layer: LayerType.galactic,
@@ -228,7 +234,6 @@ const Map<TerrainType, Terrain> _typeToTerrain = <TerrainType, Terrain>{
       TerrainType.solarSpace,
     ],
   ),
-
   TerrainType.solarSpace: Terrain(
     terrainType: TerrainType.solarSpace,
     layer: LayerType.solar,
@@ -236,7 +241,6 @@ const Map<TerrainType, Terrain> _typeToTerrain = <TerrainType, Terrain>{
       TerrainType.terrestrialSpace,
     ],
   ),
-
   TerrainType.star: Terrain(
     terrainType: TerrainType.star,
     layer: LayerType.solar,
@@ -244,7 +248,6 @@ const Map<TerrainType, Terrain> _typeToTerrain = <TerrainType, Terrain>{
       TerrainType.terrestrialStar,
     ],
   ),
-
   TerrainType.planet: Terrain(
     terrainType: TerrainType.planet,
     layer: LayerType.solar,
@@ -253,7 +256,6 @@ const Map<TerrainType, Terrain> _typeToTerrain = <TerrainType, Terrain>{
       TerrainType.continent,
     ],
   ),
-
   TerrainType.continent: Terrain(
     terrainType: TerrainType.continent,
     layer: LayerType.terrestrial,
@@ -266,7 +268,6 @@ const Map<TerrainType, Terrain> _typeToTerrain = <TerrainType, Terrain>{
       TerrainType.water,
     ],
   ),
-
   TerrainType.ocean: Terrain(
     terrainType: TerrainType.ocean,
     layer: LayerType.terrestrial,
@@ -274,7 +275,6 @@ const Map<TerrainType, Terrain> _typeToTerrain = <TerrainType, Terrain>{
       TerrainType.water,
     ],
   ),
-
   TerrainType.terrestrialSpace: Terrain(
     terrainType: TerrainType.terrestrialSpace,
     layer: LayerType.terrestrial,
@@ -282,7 +282,6 @@ const Map<TerrainType, Terrain> _typeToTerrain = <TerrainType, Terrain>{
       TerrainType.localSpace,
     ],
   ),
-
   TerrainType.terrestrialStar: Terrain(
     terrainType: TerrainType.terrestrialStar,
     layer: LayerType.terrestrial,
@@ -290,22 +289,18 @@ const Map<TerrainType, Terrain> _typeToTerrain = <TerrainType, Terrain>{
       TerrainType.localStar,
     ],
   ),
-
   TerrainType.grassland: Terrain(
     terrainType: TerrainType.grassland,
     layer: LayerType.local,
   ),
-
   TerrainType.water: Terrain(
     terrainType: TerrainType.water,
     layer: LayerType.local,
   ),
-
   TerrainType.localSpace: Terrain(
     terrainType: TerrainType.localSpace,
     layer: LayerType.local,
   ),
-
   TerrainType.localStar: Terrain(
     terrainType: TerrainType.localStar,
     layer: LayerType.local,
@@ -336,20 +331,18 @@ enum TerrainType {
 // Row and column are local to the given layerType.
 class Location {
   Location({
-    this.row,
-    this.column,
-    this.layerType,
-  }) : assert(row != null),
-       assert(column != null),
-       assert(layerType != null);
+    required this.row,
+    required this.column,
+    required this.layerType,
+  });
 
   Location get parent {
-    final LayerType parentLayerType = layers[layerType].parent;
+    final LayerType? parentLayerType = layers[layerType]?.parent;
     assert(parentLayerType != null);
     return Location(
       row: (row / Layer.layerScale).floor(),
       column: (column / Layer.layerScale).floor(),
-      layerType: parentLayerType,
+      layerType: parentLayerType!,
     );
   }
 
@@ -358,7 +351,10 @@ class Location {
     final int normalColumn = column % 10;
 
     // Square edge.
-    if (normalRow == 0 || normalRow == 9 || normalColumn == 0 || normalColumn == 9) {
+    if (normalRow == 0 ||
+        normalRow == 9 ||
+        normalColumn == 0 ||
+        normalColumn == 9) {
       return true;
     }
 
@@ -387,23 +383,24 @@ class Location {
   // 10: (1, 0)
   // 11: (1, 1)
   // ...
-  Iterable<Location> _children;
+  Iterable<Location>? _children;
   Iterable<Location> get children {
     if (_children != null) {
-      return _children;
+      return _children!;
     }
     assert(layerType != LayerType.local);
 
     final int startingRow = row * Layer.layerScale;
     final int startingColumn = column * Layer.layerScale;
-    _children = Iterable.generate(Layer.layerScale * Layer.layerScale, (int index) {
+    _children =
+        Iterable.generate(Layer.layerScale * Layer.layerScale, (int index) {
       return Location(
         row: startingRow + (index / Layer.layerScale).floor(),
         column: startingColumn + index % Layer.layerScale,
-        layerType: layers[layerType].child,
+        layerType: layers[layerType]!.child!,
       );
     });
-    return _children;
+    return _children!;
   }
 
   @override
@@ -420,8 +417,8 @@ class Location {
       return false;
     }
 
-    return other.row == row
-        && other.column == column
-        && other.layerType == layerType;
+    return other.row == row &&
+        other.column == column &&
+        other.layerType == layerType;
   }
 }

@@ -1,19 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-typedef _CellBuilder = Widget Function(BuildContext context, int row, int column);
+typedef _CellBuilder = Widget Function(
+    BuildContext context, int row, int column);
 
 class TableBuilder extends StatelessWidget {
   const TableBuilder({
-    @required this.rowCount,
-    @required this.columnCount,
-    @required this.cellWidth,
-    this.builder,
-  }) : assert(rowCount != null),
-       assert(columnCount != null),
-       assert(cellWidth != null),
-       assert(rowCount != null && rowCount > 0),
-       assert(columnCount != null && columnCount > 0);
+    required this.rowCount,
+    required this.columnCount,
+    required this.cellWidth,
+    required this.builder,
+  })  : assert(rowCount > 0),
+        assert(columnCount > 0);
 
   final int rowCount;
   final int columnCount;

@@ -5,9 +5,9 @@ import 'rive_asset.dart';
 
 class Star extends RiveAsset {
   const Star({
-    Key key,
+    Key? key,
   }) : super(
-    key: key,
-    asset: 'assets/star.riv',
-  );
+          key: key,
+          asset: 'assets/star.riv',
+        );
 }

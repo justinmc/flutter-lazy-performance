@@ -5,9 +5,9 @@ import 'rive_asset.dart';
 
 class Fire extends RiveAsset {
   const Fire({
-    Key key,
+    Key? key,
   }) : super(
-    key: key,
-    asset: 'assets/fire.riv',
-  );
+          key: key,
+          asset: 'assets/fire.riv',
+        );
 }
