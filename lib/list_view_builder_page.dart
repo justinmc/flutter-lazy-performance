@@ -4,11 +4,12 @@ import 'package:flutter/widgets.dart';
 import 'marty.dart';
 
 class ListViewBuilderPage extends StatefulWidget {
-  const ListViewBuilderPage({ Key key }) : super(key: key);
+  const ListViewBuilderPage({Key? key}) : super(key: key);
 
   static const String routeName = '/list-view-builder';
 
-  @override _ListViewBuilderPageState createState() => _ListViewBuilderPageState();
+  @override
+  _ListViewBuilderPageState createState() => _ListViewBuilderPageState();
 }
 
 class _ListViewBuilderPageState extends State<ListViewBuilderPage> {
@@ -19,8 +20,7 @@ class _ListViewBuilderPageState extends State<ListViewBuilderPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('ListView.builder'),
-        actions: <Widget>[
-        ],
+        actions: <Widget>[],
       ),
       body: Center(
         child: Container(

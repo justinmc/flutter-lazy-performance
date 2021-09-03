@@ -4,15 +4,17 @@ import 'package:flutter/widgets.dart';
 import 'marty.dart';
 
 class IVSlowPage extends StatefulWidget {
-  const IVSlowPage({ Key key }) : super(key: key);
+  const IVSlowPage({Key? key}) : super(key: key);
 
   static const String routeName = '/iv-slow';
 
-  @override _IVSlowPageState createState() => _IVSlowPageState();
+  @override
+  _IVSlowPageState createState() => _IVSlowPageState();
 }
 
 class _IVSlowPageState extends State<IVSlowPage> {
-  final TransformationController _transformationController = TransformationController();
+  final TransformationController _transformationController =
+      TransformationController();
 
   static const double _cellWidth = 200.0;
   static const double _cellHeight = 200.0;
@@ -40,8 +42,7 @@ class _IVSlowPageState extends State<IVSlowPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Two Dimensions - Naive'),
-        actions: <Widget>[
-        ],
+        actions: <Widget>[],
       ),
       body: Center(
         child: InteractiveViewer(
@@ -68,4 +69,3 @@ class _IVSlowPageState extends State<IVSlowPage> {
     );
   }
 }
-

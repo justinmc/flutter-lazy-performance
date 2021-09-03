@@ -18,19 +18,42 @@ import 'star_close.dart';
 import 'ufo.dart';
 import 'wave.dart';
 
-class ProceduralGenerationPage extends StatefulWidget {
-  const ProceduralGenerationPage({ Key key }) : super(key: key);
+class ProceduralGenerationPage extends StatelessWidget {
+  const ProceduralGenerationPage({Key? key}) : super(key: key);
 
   static const String routeName = '/procedural-generation';
 
-  @override _ProceduralGenerationPageState createState() => _ProceduralGenerationPageState();
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Procedural Generation'),
+        actions: <Widget>[],
+      ),
+      body: Center(
+        child: InteractiveMap(),
+      ),
+    );
+  }
 }
 
-class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
-  final TransformationController _transformationController = TransformationController();
+class InteractiveMap extends StatefulWidget {
+  const InteractiveMap({
+    Key? key,
+  }) : super(key: key);
 
   static const double _minScale = 0.006;
   static const double _maxScale = 10.5;
+
+  @override
+  State<InteractiveMap> createState() => _InteractiveMapState();
+}
+
+class _InteractiveMapState extends State<InteractiveMap>
+    with TickerProviderStateMixin {
+  final _transformationController = TransformationController();
+  late Animation<Matrix4> _animationReset;
+  late final AnimationController _controllerReset;
 
   void _onChangeTransformation() {
     setState(() {});
@@ -39,96 +62,161 @@ class _ProceduralGenerationPageState extends State<ProceduralGenerationPage> {
   @override
   void initState() {
     super.initState();
+
+    _controllerReset = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 700),
+    );
+
     _transformationController.addListener(_onChangeTransformation);
   }
 
   @override
   void dispose() {
+    _controllerReset.dispose();
     _transformationController.removeListener(_onChangeTransformation);
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Procedural Generation'),
-        actions: <Widget>[
-        ],
-      ),
-      body: Center(
-        child: LayoutBuilder(
-          builder: (BuildContext context, BoxConstraints constraints) {
-            return InteractiveViewer.builder(
-              transformationController: _transformationController,
-              maxScale: _maxScale,
-              minScale: _minScale,
-              boundaryMargin: EdgeInsets.all(double.infinity),
-              builder: (BuildContext context, Quad viewport) {
-                return _MapGrid(
-                  viewport: axisAlignedBoundingBox(viewport),
-                );
-              },
+    return Stack(
+      alignment: Alignment.bottomRight,
+      children: [
+        InteractiveViewer.builder(
+          transformationController: _transformationController,
+          maxScale: InteractiveMap._maxScale,
+          minScale: InteractiveMap._minScale,
+          boundaryMargin: EdgeInsets.all(double.infinity),
+          onInteractionStart: _onInteractionStart,
+          builder: (BuildContext context, Quad viewport) {
+            return _MapGrid(
+              viewport: axisAlignedBoundingBox(viewport),
             );
           },
         ),
-      ),
+        Positioned(
+            bottom: 30,
+            right: 30,
+            child: GestureDetector(
+              onTapUp: (TapUpDetails details) {
+                _animateResetInitialize(details);
+              },
+              child: Container(
+                key: UniqueKey(),
+                color: Colors.red,
+                width: 150,
+                height: 75,
+              ),
+            )),
+      ],
     );
+  }
+
+  void _animateResetInitialize(TapUpDetails details) {
+    _controllerReset.reset();
+    var _tagretPosition = Matrix4.identity();
+    // _tagretPosition.translate(_dx * dxMultiplier, _dy * dyMultiplier);
+    _animationReset = Matrix4Tween(
+      begin: _transformationController.value,
+      end: _tagretPosition,
+    ).animate(_controllerReset);
+    _animationReset.addListener(_onAnimateReset);
+    _controllerReset.forward();
+  }
+
+  void _onAnimateReset() {
+    _transformationController.value = _animationReset.value;
+    if (!_controllerReset.isAnimating) {
+      _animationReset.removeListener(_onAnimateReset);
+      _controllerReset.reset();
+    }
+  }
+
+  // Stop a running reset to home transform animation.
+  void _animateResetStop() {
+    _controllerReset.stop();
+    _animationReset.removeListener(_onAnimateReset);
+    _controllerReset.reset();
+  }
+
+  void _onInteractionStart(ScaleStartDetails details) {
+    // If the user tries to cause a transformation while the reset animation is
+    // running, cancel the reset animation.
+    if (_controllerReset.status == AnimationStatus.forward) {
+      _animateResetStop();
+    }
   }
 }
 
-class _MapGrid extends StatefulWidget{
+class _MapGrid extends StatefulWidget {
   _MapGrid({
-    Key key,
-    this.viewport,
+    Key? key,
+    required this.viewport,
   }) : super(key: key);
 
   final Rect viewport;
 
   @override
-  _MapGridState createState() => _MapGridState();
+  State<_MapGrid> createState() => _MapGridState();
 }
 
 class _MapGridState extends State<_MapGrid> {
-  final MapData _mapData = MapData(seed: 80);
-  Set<TileData> _visibleTileDatas = Set<TileData>();
+  final _mapData = MapData(seed: 80);
+  var _visibleTileDatas = Set<TileData>();
 
-  Rect _cachedViewport;
-  int _firstVisibleColumn;
-  int _firstVisibleRow;
-  int _lastVisibleColumn;
-  int _lastVisibleRow;
+  Rect? _cachedViewport;
+
+  late int _firstVisibleColumn;
+  late int _firstVisibleRow;
+  late int _lastVisibleColumn;
+  late int _lastVisibleRow;
+
   bool _isCellVisible(int row, int column, final LayerType layerType) {
     if (widget.viewport != _cachedViewport) {
       _cachedViewport = widget.viewport;
-      int layerExponent = 0;
-      LayerType currentLayerType = layers[layerType].child;
+
+      num layerExponent = 0;
+      LayerType? currentLayerType = layers[layerType]?.child;
+
       while (currentLayerType != null) {
         layerExponent++;
-        currentLayerType = layers[currentLayerType].child;
+        currentLayerType = layers[currentLayerType]?.child;
       }
-      final int layerScale = pow(10, layerExponent);
-      _firstVisibleRow = (widget.viewport.top / (cellSize.height * layerScale)).floor();
-      _firstVisibleColumn = (widget.viewport.left / (cellSize.width * layerScale)).floor();
-      _lastVisibleRow = (widget.viewport.bottom / (cellSize.height * layerScale)).floor();
-      _lastVisibleColumn = (widget.viewport.right / (cellSize.width * layerScale)).floor();
+
+      final num layerScale = pow(10, layerExponent);
+      _firstVisibleRow =
+          (widget.viewport.top / (cellSize.height * layerScale)).floor();
+      _firstVisibleColumn =
+          (widget.viewport.left / (cellSize.width * layerScale)).floor();
+      _lastVisibleRow =
+          (widget.viewport.bottom / (cellSize.height * layerScale)).floor();
+      _lastVisibleColumn =
+          (widget.viewport.right / (cellSize.width * layerScale)).floor();
     }
 
-    return row >= _firstVisibleRow && row <= _lastVisibleRow
-        && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
+    return row >= _firstVisibleRow &&
+        row <= _lastVisibleRow &&
+        column >= _firstVisibleColumn &&
+        column <= _lastVisibleColumn;
   }
 
   void _updateVisibleTileDatas(LayerType parentLayerType, TileData center) {
-    Set<TileData> nextVisibleTileDatas = Set<TileData>();
-    for (int row = center.location.row - 1; row <= center.location.row + 1; row++) {
-      for (int column = center.location.column - 1; column <= center.location.column + 1; column++) {
-        final TileData tileData = _mapData.getTileDataAt(Location(
+    final nextVisibleTileDatas = Set<TileData>();
+    for (int row = center.location.row - 1;
+        row <= center.location.row + 1;
+        row++) {
+      for (int column = center.location.column - 1;
+          column <= center.location.column + 1;
+          column++) {
+        final tileData = _mapData.getTileDataAt(Location(
           row: row,
           column: column,
           layerType: parentLayerType,
         ));
         if (_visibleTileDatas.contains(tileData)) {
-          nextVisibleTileDatas.add(_visibleTileDatas.lookup(tileData));
+          var _tileData = _visibleTileDatas.lookup(tileData);
+          if (_tileData != null) nextVisibleTileDatas.add(_tileData);
         } else {
           nextVisibleTileDatas.add(tileData);
         }
@@ -141,24 +229,25 @@ class _MapGridState extends State<_MapGrid> {
   Widget build(BuildContext context) {
     //LayerType parentLayerType = _visibleTileDatas.first.location.layerType;
     LayerType parentLayerType;
-    if (max(widget.viewport.width, widget.viewport.height) < 100) {
+    var _max = max(widget.viewport.width, widget.viewport.height);
+    if (_max < 100) {
       parentLayerType = LayerType.local;
-    } else if (max(widget.viewport.width, widget.viewport.height) < 1000) {
+    } else if (_max < 1000) {
       parentLayerType = LayerType.terrestrial;
-    } else if (max(widget.viewport.width, widget.viewport.height) < 10000) {
+    } else if (_max < 10000) {
       parentLayerType = LayerType.solar;
     } else {
       parentLayerType = LayerType.galactic;
     }
 
-    TileData center = _mapData.getLowestTileDataAtScreenOffset(widget.viewport.center);
+    var center =
+        _mapData.getLowestTileDataAtScreenOffset(widget.viewport.center);
     while (center.location.layerType != parentLayerType) {
-      assert(center.location.layerType != null);
-      center = center.parent;
+      center = center.parent!;
     }
     _updateVisibleTileDatas(parentLayerType, center);
 
-    final Size size = layers[parentLayerType].size;
+    final size = layers[parentLayerType]?.size ?? Size.zero;
 
     return Container(
       width: size.width * 3,
@@ -172,23 +261,31 @@ class _MapGridState extends State<_MapGrid> {
             left: center.location.column * size.height - size.height,
             child: Column(
               children: <Widget>[
-                for (int row = center.location.row - 1; row <= center.location.row + 1; row++)
+                for (int row = center.location.row - 1;
+                    row <= center.location.row + 1;
+                    row++)
                   Row(
                     children: <Widget>[
-                      for (int column = center.location.column - 1; column <= center.location.column + 1; column++)
+                      for (int column = center.location.column - 1;
+                          column <= center.location.column + 1;
+                          column++)
                         _isCellVisible(row, column, parentLayerType)
-                          ? _ParentMapTile(
-                            viewport: widget.viewport,
-                            tileData: _visibleTileDatas.lookup(_mapData.getTileDataAt(Location(
-                              row: row,
-                              column: column,
-                              layerType: parentLayerType,
-                            ))),
-                          )
-                          : Container(
-                              width: size.width,
-                              height: size.height,
-                            ),
+                            ? _ParentMapTile(
+                                viewport: widget.viewport,
+                                tileData: _visibleTileDatas.lookup(
+                                  _mapData.getTileDataAt(
+                                    Location(
+                                      row: row,
+                                      column: column,
+                                      layerType: parentLayerType,
+                                    ),
+                                  ),
+                                )!,
+                              )
+                            : Container(
+                                width: size.width,
+                                height: size.height,
+                              ),
                     ],
                   ),
               ],
@@ -202,44 +299,50 @@ class _MapGridState extends State<_MapGrid> {
 
 // Render all of the children tiles of the given parent tile.
 class _ParentMapTile extends StatelessWidget {
-  _ParentMapTile({
-    Key key,
-    // Render all the children tiles of this given tile.
-    @required this.tileData,
-    @required this.viewport
-  }) : assert(tileData != null),
-       assert(viewport != null),
-       super(key: key ?? GlobalObjectKey(tileData));
+  _ParentMapTile(
+      {Key? key,
+      // Render all the children tiles of this given tile.
+      required this.tileData,
+      required this.viewport})
+      : super(key: key ?? GlobalObjectKey(tileData));
 
   final TileData tileData;
   final Rect viewport;
 
   // The visibility of child tiles.
-  int _firstRow;
-  int _firstColumn;
-  int _firstVisibleColumn;
-  int _firstVisibleRow;
-  int _lastVisibleColumn;
-  int _lastVisibleRow;
+  int? _firstRow;
+  int? _firstColumn;
+  int? _firstVisibleColumn;
+  int? _firstVisibleRow;
+  int? _lastVisibleColumn;
+  int? _lastVisibleRow;
+
   void _calculateVisibility() {
     // Only calculate this once. Also, not needed at all for local.
-    if (_firstVisibleRow != null || tileData.location.layerType == LayerType.local) {
+    if (_firstVisibleRow != null ||
+        tileData.location.layerType == LayerType.local) {
       return;
     }
 
-    final int layerExponent = layers[tileData.location.layerType].level;
-    final int childLayerScale = pow(10, layerExponent - 1);
+    final int layerExponent = layers[tileData.location.layerType]!.level;
+    final num childLayerScale = pow(10, layerExponent - 1);
     _firstRow = tileData.location.row * Layer.layerScale;
     _firstColumn = tileData.location.column * Layer.layerScale;
-    _firstVisibleRow = (viewport.top / (cellSize.height * childLayerScale)).floor();
-    _firstVisibleColumn = (viewport.left / (cellSize.width * childLayerScale)).floor();
-    _lastVisibleRow = (viewport.bottom / (cellSize.height * childLayerScale)).floor();
-    _lastVisibleColumn = (viewport.right / (cellSize.width * childLayerScale)).floor();
+    _firstVisibleRow =
+        (viewport.top / (cellSize.height * childLayerScale)).floor();
+    _firstVisibleColumn =
+        (viewport.left / (cellSize.width * childLayerScale)).floor();
+    _lastVisibleRow =
+        (viewport.bottom / (cellSize.height * childLayerScale)).floor();
+    _lastVisibleColumn =
+        (viewport.right / (cellSize.width * childLayerScale)).floor();
   }
 
   bool _isCellVisible(int row, int column) {
-    final bool visible = row >= _firstVisibleRow && row <= _lastVisibleRow
-        && column >= _firstVisibleColumn && column <= _lastVisibleColumn;
+    final bool visible = row >= _firstVisibleRow! &&
+        row <= _lastVisibleRow! &&
+        column >= _firstVisibleColumn! &&
+        column <= _lastVisibleColumn!;
     return visible;
   }
 
@@ -252,18 +355,24 @@ class _ParentMapTile extends StatelessWidget {
       return _MapTile(tileData: tileData);
     }
 
-    final Layer parentLayer = layers[tileData.location.layerType];
-    final Size size = layers[parentLayer.child].size;
+    final Layer parentLayer = layers[tileData.location.layerType]!;
+    final Size size = layers[parentLayer.child]!.size;
 
     return Column(
       children: <Widget>[
-        for (int row = _firstRow; row < _firstRow + Layer.layerScale; row++)
+        for (int row = _firstRow ?? 0;
+            row < (_firstRow ?? 0) + Layer.layerScale;
+            row++)
           Row(
             children: <Widget>[
-              for (int column = _firstColumn; column < _firstColumn + Layer.layerScale; column++)
+              for (int column = _firstColumn ?? 0;
+                  column < (_firstColumn ?? 0) + Layer.layerScale;
+                  column++)
                 _isCellVisible(row, column)
-                  ? _MapTile(tileData: TileData.getByRowColumn(tileData.children, row % Layer.layerScale, column % Layer.layerScale))
-                  : SizedBox(width: size.width, height: size.height),
+                    ? _MapTile(
+                        tileData: TileData.getByRowColumn(tileData.children,
+                            row % Layer.layerScale, column % Layer.layerScale))
+                    : SizedBox(width: size.width, height: size.height),
             ],
           ),
       ],
@@ -273,8 +382,8 @@ class _ParentMapTile extends StatelessWidget {
 
 class _MapTile extends StatelessWidget {
   _MapTile({
-    Key key,
-    @required this.tileData,
+    Key? key,
+    required this.tileData,
   }) : super(key: key);
 
   final TileData tileData;
@@ -302,7 +411,7 @@ class _MapTile extends StatelessWidget {
     }
   }
 
-  Widget get _aLocation {
+  Widget? get _aLocation {
     switch (tileData.terrain.terrainType) {
       case TerrainType.grassland:
         return Grass();
@@ -338,7 +447,7 @@ class _MapTile extends StatelessWidget {
     }
   }
 
-  Widget get _bLocation {
+  Widget? get _bLocation {
     switch (tileData.terrain.terrainType) {
       case TerrainType.grassland:
         return Marty(index: 0, isBackgroundTransparent: true);
@@ -365,8 +474,8 @@ class _MapTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final int layerExponent = layers[tileData.location.layerType].level;
-    final int layerScale = pow(10, layerExponent);
+    final int layerExponent = layers[tileData.location.layerType]!.level;
+    final num layerScale = pow(10, layerExponent);
     return Container(
       width: tileData.size.width,
       height: tileData.size.height,
@@ -412,8 +521,14 @@ class _MapTile extends StatelessWidget {
           for (Location location in tileData.aLocations)
             if (location != null)
               Positioned(
-                left: location.column * cellSize.width / Layer.layerScale * layerScale,
-                top: location.row * cellSize.height / Layer.layerScale * layerScale,
+                left: location.column *
+                    cellSize.width /
+                    Layer.layerScale *
+                    layerScale,
+                top: location.row *
+                    cellSize.height /
+                    Layer.layerScale *
+                    layerScale,
                 child: SizedBox(
                   width: 20.0 * layerScale,
                   height: 20.0 * layerScale,
@@ -423,7 +538,7 @@ class _MapTile extends StatelessWidget {
           for (Location location in tileData.bLocations)
             if (location != null)
               Positioned(
-                  /*
+                /*
                 left: location.column * cellSize.width / Layer.layerScale * layerScale,
                 top: location.row * cellSize.height / Layer.layerScale * layerScale,
                 */
