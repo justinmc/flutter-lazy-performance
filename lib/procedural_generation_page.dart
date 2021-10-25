@@ -302,6 +302,8 @@ class _MapTile extends StatelessWidget {
     }
   }
 
+  // TODO(justinmc): These a and b location tile widgets should be cached so
+  // that they aren't rebuilt on every pan/zoom.
   Widget get _aLocation {
     switch (tileData.terrain.terrainType) {
       case TerrainType.grassland:
