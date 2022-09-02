@@ -7,7 +7,7 @@ class Wave extends RiveAsset {
   const Wave({
     Key key,
   }) : super(
-    key: key,
-    asset: 'assets/wave.riv',
-  );
+          key: key,
+          asset: 'assets/wave.riv',
+        );
 }

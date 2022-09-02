@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'marty.dart';
 
 class SingleChildScrollViewPage extends StatefulWidget {
-  const SingleChildScrollViewPage({ Key key }) : super(key: key);
+  const SingleChildScrollViewPage({Key key}) : super(key: key);
 
   static const String routeName = '/single-child-scroll-view';
 
-  @override _SingleChildScrollViewPageState createState() => _SingleChildScrollViewPageState();
+  @override
+  _SingleChildScrollViewPageState createState() =>
+      _SingleChildScrollViewPageState();
 }
 
 class _SingleChildScrollViewPageState extends State<SingleChildScrollViewPage> {
@@ -19,8 +20,7 @@ class _SingleChildScrollViewPageState extends State<SingleChildScrollViewPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('SingleChildScrollView'),
-        actions: <Widget>[
-        ],
+        actions: <Widget>[],
       ),
       body: Center(
         child: Container(

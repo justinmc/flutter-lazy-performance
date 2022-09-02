@@ -16,8 +16,8 @@ class Layer {
     this.parent,
     this.child,
     this.level,
-  }) : assert(scale == 1.0 || scale == 0.1 || scale == 0.01 || scale == 0.001),
-       assert(level != null && level >= 0 && level < 4);
+  })  : assert(scale == 1.0 || scale == 0.1 || scale == 0.01 || scale == 0.001),
+        assert(level != null && level >= 0 && level < 4);
 
   // Each layer has 10x as many tiles as its parent.
   static const int layerScale = 10;

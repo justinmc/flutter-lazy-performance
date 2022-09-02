@@ -7,7 +7,7 @@ class Planet extends RiveAsset {
   const Planet({
     Key key,
   }) : super(
-    key: key,
-    asset: 'assets/planet.riv',
-  );
+          key: key,
+          asset: 'assets/planet.riv',
+        );
 }

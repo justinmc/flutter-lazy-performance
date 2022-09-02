@@ -27,12 +27,16 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: <String, Widget Function(BuildContext)>{
         '/': (BuildContext context) => MyHomePage(),
-        SingleChildScrollViewPage.routeName: (BuildContext context) => SingleChildScrollViewPage(),
-        ListViewBuilderPage.routeName: (BuildContext context) => ListViewBuilderPage(),
+        SingleChildScrollViewPage.routeName: (BuildContext context) =>
+            SingleChildScrollViewPage(),
+        ListViewBuilderPage.routeName: (BuildContext context) =>
+            ListViewBuilderPage(),
         IVSlowPage.routeName: (BuildContext context) => IVSlowPage(),
         IVBuilderPage.routeName: (BuildContext context) => IVBuilderPage(),
-        IVBuilderTablePage.routeName: (BuildContext context) => IVBuilderTablePage(),
-        ProceduralGenerationPage.routeName: (BuildContext context) => ProceduralGenerationPage(),
+        IVBuilderTablePage.routeName: (BuildContext context) =>
+            IVBuilderTablePage(),
+        ProceduralGenerationPage.routeName: (BuildContext context) =>
+            ProceduralGenerationPage(),
       },
     );
   }
