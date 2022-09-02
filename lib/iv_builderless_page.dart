@@ -6,7 +6,7 @@ import 'table_builder.dart';
 // This page shows how to achieve a similar effect as InteractiveViewer.builder
 // but before builder was implemented in the framework.
 class IVBuilderlessPage extends StatefulWidget {
-  const IVBuilderlessPage({Key key}) : super(key: key);
+  const IVBuilderlessPage({Key? key}) : super(key: key);
 
   static const String routeName = '/iv-builder';
 
@@ -31,11 +31,11 @@ class _IVBuilderlessPageState extends State<IVBuilderlessPage> {
         column <= _lastVisibleColumn;
   }
 
-  Rect _cachedViewport;
-  int _firstVisibleColumn;
-  int _firstVisibleRow;
-  int _lastVisibleColumn;
-  int _lastVisibleRow;
+  Rect? _cachedViewport;
+  late int _firstVisibleColumn;
+  late int _firstVisibleRow;
+  late int _lastVisibleColumn;
+  late int _lastVisibleRow;
   void _calculateVisibleCells(Rect viewport) {
     _cachedViewport = viewport;
     _firstVisibleRow = (viewport.top / _cellHeight).floor();

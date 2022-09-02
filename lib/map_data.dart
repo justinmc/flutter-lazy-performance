@@ -6,8 +6,8 @@ import 'layer.dart';
 
 class MapData {
   MapData({
-    this.seed,
-  }) : assert(seed != null);
+    required this.seed,
+  });
 
   final int seed;
 
@@ -28,20 +28,16 @@ class MapData {
 
 class TileData {
   TileData({
-    this.location,
-    this.aLocations,
-    this.bLocations,
+    required this.location,
+    required this.aLocations,
+    required this.bLocations,
     this.parent,
-    this.seed,
-    this.terrain,
-  })  : assert(location != null),
-        assert(aLocations != null),
-        assert(bLocations != null),
-        assert(seed != null),
-        assert(terrain != null);
+    required this.seed,
+    required this.terrain,
+  });
 
   factory TileData.generate(Location location, int seed) {
-    TileData parent;
+    TileData? parent;
     if (location.layerType != LayerType.galactic) {
       parent = TileData.generate(
         location.parent,
@@ -75,7 +71,7 @@ class TileData {
       aLocations: aLocations,
       bLocations: bLocations,
       seed: seed,
-      terrain: _typeToTerrain[terrainType],
+      terrain: _typeToTerrain[terrainType]!,
       parent: parent,
     );
   }
@@ -83,7 +79,7 @@ class TileData {
   static const int _maxLocations = 3;
 
   static TerrainType _getTerrainType(
-      TileData parent, Location location, Random random) {
+      TileData? parent, Location location, Random random) {
     if (parent == null) {
       return _galacticTerrainTypes[
           random.nextInt(_galacticTerrainTypes.length)];
@@ -128,7 +124,7 @@ class TileData {
     }
 
     List<TerrainType> childTerrainTypes =
-        List.from(parent.terrain.childTerrainTypes);
+        List.from(parent.terrain.childTerrainTypes!);
 
     // Only 1 star in a solar system.
     if (parent.terrain.terrainType == TerrainType.solarSystem) {
@@ -161,23 +157,23 @@ class TileData {
   final Location location;
   final Iterable<Location> aLocations;
   final Iterable<Location> bLocations;
-  final TileData parent;
+  final TileData? parent;
   final int seed;
   final Terrain terrain;
 
-  Iterable<TileData> _children;
-  Iterable<TileData> get children {
+  Iterable<TileData>? _children;
+  Iterable<TileData>? get children {
     if (_children != null) {
       return _children;
     }
     _children =
         Iterable.generate(Layer.layerScale * Layer.layerScale, (int index) {
-      return TileData.generate(location.children.elementAt(index), seed);
+      return TileData.generate(location.children!.elementAt(index), seed);
     });
     return _children;
   }
 
-  Size get size => layers[location.layerType].size;
+  Size get size => layers[location.layerType]!.size;
 
   @override
   String toString() {
@@ -200,15 +196,15 @@ class TileData {
 class Terrain {
   const Terrain({
     this.layer,
-    this.terrainType,
+    required this.terrainType,
     this.childTerrainTypes,
     this.limitPerParent,
   });
 
   final TerrainType terrainType;
-  final LayerType layer;
-  final List<TerrainType> childTerrainTypes;
-  final int limitPerParent;
+  final LayerType? layer;
+  final List<TerrainType>? childTerrainTypes;
+  final int? limitPerParent;
 
   @override
   String toString() {
@@ -335,16 +331,13 @@ enum TerrainType {
 // Row and column are local to the given layerType.
 class Location {
   Location({
-    this.row,
-    this.column,
-    this.layerType,
-  })  : assert(row != null),
-        assert(column != null),
-        assert(layerType != null);
+    required this.row,
+    required this.column,
+    required this.layerType,
+  });
 
   Location get parent {
-    final LayerType parentLayerType = layers[layerType].parent;
-    assert(parentLayerType != null);
+    final LayerType parentLayerType = layers[layerType]!.parent!;
     return Location(
       row: (row / Layer.layerScale).floor(),
       column: (column / Layer.layerScale).floor(),
@@ -389,8 +382,8 @@ class Location {
   // 10: (1, 0)
   // 11: (1, 1)
   // ...
-  Iterable<Location> _children;
-  Iterable<Location> get children {
+  Iterable<Location>? _children;
+  Iterable<Location>? get children {
     if (_children != null) {
       return _children;
     }
@@ -403,7 +396,7 @@ class Location {
       return Location(
         row: startingRow + (index / Layer.layerScale).floor(),
         column: startingColumn + index % Layer.layerScale,
-        layerType: layers[layerType].child,
+        layerType: layers[layerType]!.child!,
       );
     });
     return _children;

@@ -22,15 +22,15 @@ class Layer {
   // Each layer has 10x as many tiles as its parent.
   static const int layerScale = 10;
 
-  final LayerType parent;
-  final LayerType child;
-  final double scale;
-  final int level;
+  final LayerType? parent;
+  final LayerType? child;
+  final double? scale;
+  final int? level;
 
   Size get size {
     return Size(
-      cellSize.width * pow(Layer.layerScale, level),
-      cellSize.height * pow(Layer.layerScale, level),
+      cellSize.width * pow(Layer.layerScale, level!),
+      cellSize.height * pow(Layer.layerScale, level!),
     );
   }
 }

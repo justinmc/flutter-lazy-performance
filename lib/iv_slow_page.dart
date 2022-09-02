@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'marty.dart';
 
 class IVSlowPage extends StatefulWidget {
-  const IVSlowPage({Key key}) : super(key: key);
+  const IVSlowPage({Key? key}) : super(key: key);
 
   static const String routeName = '/iv-slow';
 

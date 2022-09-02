@@ -5,7 +5,7 @@ import 'rive_asset.dart';
 
 class Wave extends RiveAsset {
   const Wave({
-    Key key,
+    Key? key,
   }) : super(
           key: key,
           asset: 'assets/wave.riv',

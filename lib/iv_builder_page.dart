@@ -5,7 +5,7 @@ import 'helpers.dart';
 import 'marty.dart';
 
 class IVBuilderPage extends StatefulWidget {
-  const IVBuilderPage({Key key}) : super(key: key);
+  const IVBuilderPage({Key? key}) : super(key: key);
 
   static const String routeName = '/iv-builder';
 
@@ -24,11 +24,11 @@ class _IVBuilderPageState extends State<IVBuilderPage> {
 
   // Returns true iff the given cell is currently visible. Caches viewport
   // calculations.
-  Quad _cachedViewport;
-  int _firstVisibleColumn;
-  int _firstVisibleRow;
-  int _lastVisibleColumn;
-  int _lastVisibleRow;
+  Quad? _cachedViewport;
+  late int _firstVisibleColumn;
+  late int _firstVisibleRow;
+  late int _lastVisibleColumn;
+  late int _lastVisibleRow;
   bool _isCellVisible(int row, int column, Quad viewport) {
     if (viewport != _cachedViewport) {
       final Rect aabb = axisAlignedBoundingBox(viewport);

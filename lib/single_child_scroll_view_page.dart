@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'marty.dart';
 
 class SingleChildScrollViewPage extends StatefulWidget {
-  const SingleChildScrollViewPage({Key key}) : super(key: key);
+  const SingleChildScrollViewPage({Key? key}) : super(key: key);
 
   static const String routeName = '/single-child-scroll-view';
 
