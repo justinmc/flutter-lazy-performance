@@ -7,7 +7,7 @@ class Grass extends RiveAsset {
   const Grass({
     Key key,
   }) : super(
-    key: key,
-    asset: 'assets/grass.riv',
-  );
+          key: key,
+          asset: 'assets/grass.riv',
+        );
 }

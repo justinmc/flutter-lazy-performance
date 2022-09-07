@@ -7,7 +7,7 @@ class StarClose extends RiveAsset {
   const StarClose({
     Key key,
   }) : super(
-    key: key,
-    asset: 'assets/star_close.riv',
-  );
+          key: key,
+          asset: 'assets/star_close.riv',
+        );
 }

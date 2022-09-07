@@ -14,7 +14,8 @@ class RiveAsset extends StatefulWidget {
   final String asset; // The path to the .riv file.
   final int animationIndex;
 
-  @override _RiveAssetState createState() => _RiveAssetState();
+  @override
+  _RiveAssetState createState() => _RiveAssetState();
 }
 
 class _RiveAssetState extends State<RiveAsset> {
@@ -36,7 +37,8 @@ class _RiveAssetState extends State<RiveAsset> {
 
         if (file.import(data)) {
           final artboard = file.mainArtboard;
-          _controller = SimpleAnimation(artboard.animations[widget.animationIndex].name);
+          _controller =
+              SimpleAnimation(artboard.animations[widget.animationIndex].name);
           artboard.addController(_controller);
           setState(() {
             _riveArtboard = artboard;
@@ -56,7 +58,7 @@ class _RiveAssetState extends State<RiveAsset> {
   @override
   Widget build(BuildContext context) {
     return _riveArtboard == null
-      ? const SizedBox()
-      : Rive(artboard: _riveArtboard);
+        ? const SizedBox()
+        : Rive(artboard: _riveArtboard);
   }
 }

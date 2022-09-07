@@ -9,7 +9,12 @@ Rect axisAlignedBoundingBox(Quad quad) {
   double xMax;
   double yMin;
   double yMax;
-  for (final Vector3 point in <Vector3>[quad.point0, quad.point1, quad.point2, quad.point3]) {
+  for (final Vector3 point in <Vector3>[
+    quad.point0,
+    quad.point1,
+    quad.point2,
+    quad.point3
+  ]) {
     if (xMin == null || point.x < xMin) {
       xMin = point.x;
     }

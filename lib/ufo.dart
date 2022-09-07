@@ -7,7 +7,7 @@ class UFO extends RiveAsset {
   const UFO({
     Key key,
   }) : super(
-    key: key,
-    asset: 'assets/ufo.riv',
-  );
+          key: key,
+          asset: 'assets/ufo.riv',
+        );
 }

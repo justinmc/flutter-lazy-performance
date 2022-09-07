@@ -7,8 +7,7 @@ class Cloud extends RiveAsset {
   const Cloud({
     Key key,
   }) : super(
-    key: key,
-    asset: 'assets/cloud.riv',
-  );
+          key: key,
+          asset: 'assets/cloud.riv',
+        );
 }
-
