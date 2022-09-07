@@ -7,8 +7,8 @@ import 'rive_asset.dart';
 
 class Marty extends RiveAsset {
   Marty({
-    Key key,
-    @required int index,
+    Key? key,
+    required int index,
     bool isBackgroundTransparent = false,
   }) : super(
           key: key,

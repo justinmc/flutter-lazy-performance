@@ -5,7 +5,7 @@ import 'rive_asset.dart';
 
 class Cloud extends RiveAsset {
   const Cloud({
-    Key key,
+    Key? key,
   }) : super(
           key: key,
           asset: 'assets/cloud.riv',

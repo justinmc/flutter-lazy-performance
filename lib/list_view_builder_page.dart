@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'marty.dart';
 
 class ListViewBuilderPage extends StatefulWidget {
-  const ListViewBuilderPage({Key key}) : super(key: key);
+  const ListViewBuilderPage({Key? key}) : super(key: key);
 
   static const String routeName = '/list-view-builder';
 

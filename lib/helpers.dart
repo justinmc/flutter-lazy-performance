@@ -5,10 +5,10 @@ import 'package:vector_math/vector_math_64.dart' show Quad, Vector3;
 // Returns the axis aligned bounding box for the given Quad, which might not
 // be axis aligned.
 Rect axisAlignedBoundingBox(Quad quad) {
-  double xMin;
-  double xMax;
-  double yMin;
-  double yMax;
+  double? xMin;
+  double? xMax;
+  double? yMin;
+  double? yMax;
   for (final Vector3 point in <Vector3>[
     quad.point0,
     quad.point1,
@@ -28,5 +28,5 @@ Rect axisAlignedBoundingBox(Quad quad) {
       yMax = point.y;
     }
   }
-  return Rect.fromLTRB(xMin, yMin, xMax, yMax);
+  return Rect.fromLTRB(xMin!, yMin!, xMax!, yMax!);
 }
